@@ -1,0 +1,190 @@
+{
+  "format": 1,
+  "restore": {
+    "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj": {}
+  },
+  "projects": {
+    "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj",
+        "projectName": "StudioManagement.Application",
+        "projectPath": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.Application/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[11.11.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj",
+        "projectName": "StudioManagement.Domain",
+        "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.Domain/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj",
+        "projectName": "StudioManagement.Reports",
+        "projectPath": "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.Reports/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj"
+              },
+              "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.102.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

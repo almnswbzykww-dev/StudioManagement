@@ -1,0 +1,11 @@
+/app/applet/StudioManagement.Domain/bin/Debug/net8.0/StudioManagement.Domain.deps.json
+/app/applet/StudioManagement.Domain/bin/Debug/net8.0/StudioManagement.Domain.dll
+/app/applet/StudioManagement.Domain/bin/Debug/net8.0/StudioManagement.Domain.pdb
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/StudioManagement.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/StudioManagement.Domain.AssemblyInfoInputs.cache
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/StudioManagement.Domain.AssemblyInfo.cs
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/StudioManagement.Domain.csproj.CoreCompileInputs.cache
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/StudioManagement.Domain.dll
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/refint/StudioManagement.Domain.dll
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/StudioManagement.Domain.pdb
+/app/applet/StudioManagement.Domain/obj/Debug/net8.0/ref/StudioManagement.Domain.dll

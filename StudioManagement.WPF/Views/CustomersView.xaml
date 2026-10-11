@@ -1,0 +1,40 @@
+<UserControl x:Class="StudioManagement.WPF.Views.CustomersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FlowDirection="RightToLeft">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Action Bar -->
+        <Border Grid.Row="0" Background="{StaticResource CardBrush}" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+            <DockPanel>
+                <Button Content="+ إضافة عميل جديد" Command="{Binding OpenAddCommand}" DockPanel.Dock="Left" Background="{StaticResource BrandAccentBlueBrush}" Foreground="White" Padding="14,8" BorderThickness="0" FontWeight="Bold" Cursor="Hand" />
+                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="320" Height="34" Margin="16,0,0,0" Padding="8,6" FontSize="13" VerticalContentAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <!-- Customers DataGrid -->
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}" AutoGenerateColumns="False" IsReadOnly="True" Background="{StaticResource CardBrush}" RowBackground="{StaticResource CardBrush}" AlternatingRowBackground="#182234" Foreground="{StaticResource TextLightBrush}" BorderBrush="{StaticResource BorderLightBrush}" GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="رقم العميل" Binding="{Binding CustomerNumber}" Width="100" />
+                <DataGridTextColumn Header="اسم العميل" Binding="{Binding Name}" Width="200" />
+                <DataGridTextColumn Header="رقم الهاتف" Binding="{Binding Phone}" Width="130" />
+                <DataGridTextColumn Header="العنوان" Binding="{Binding Address}" Width="180" />
+                <DataGridTextColumn Header="الطلبات" Binding="{Binding OrdersCount}" Width="70" />
+                <DataGridTextColumn Header="إجمالي المبيعات" Binding="{Binding TotalSpent, StringFormat='{}{0:N0}'}" Width="110" />
+                <DataGridTextColumn Header="المدفوع" Binding="{Binding TotalPaid, StringFormat='{}{0:N0}'}" Width="110" />
+                <DataGridTextColumn Header="المتبقي" Binding="{Binding TotalRemaining, StringFormat='{}{0:N0}'}" Width="110" />
+                <DataGridTemplateColumn Header="إجراءات" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="حذف" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="{StaticResource BrandDangerBrush}" Foreground="White" BorderThickness="0" Padding="8,2" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,503 @@
+<Window x:Class="StudioManagement.WPF.Views.PrintPreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="معاينة الطباعة والمستندات - StudioManagement"
+        Height="820" Width="1180"
+        MinWidth="900" MinHeight="650"
+        WindowStartupLocation="CenterScreen"
+        FlowDirection="RightToLeft"
+        Background="#0B132B">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="InvoiceOnlyStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsInvoice}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="NonInvoiceOnlyStyle" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsInvoice}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Header Bar -->
+        <Border Grid.Row="0" Background="#1C2541" BorderBrush="#334155" BorderThickness="0,0,0,1" Padding="16,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="🖨️" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <TextBlock Text="معاينة المستند قبل الطباعة الفعلية" FontSize="14" FontWeight="Bold" Foreground="#F8FAFC" VerticalAlignment="Center" />
+                    <TextBlock Text=" | " Foreground="#64748B" VerticalAlignment="Center" Margin="6,0" />
+                    <TextBlock Text="{Binding DocumentData.DocumentTypeTitle}" FontSize="13" Foreground="#D97706" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Text=" - رقم: " Foreground="#94A3B8" VerticalAlignment="Center" Margin="6,0,0,0" />
+                    <TextBlock Text="{Binding DocumentData.DocumentNumber}" FontSize="13" Foreground="#38BDF8" FontWeight="Bold" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="✕ إغلاق المعاينة" Click="CloseButton_Click" Background="#DC2626" Foreground="White" BorderThickness="0" Padding="12,6" FontWeight="Bold" Cursor="Hand" />
+            </Grid>
+        </Border>
+
+        <!-- Main Body: Document View (Left/Center) + Controls Sidebar (Right) -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="340" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Printable Document Preview Area -->
+            <Border Grid.Column="0" Background="#0F172A" Padding="20">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Grid HorizontalAlignment="Center">
+                        <!-- Printable Paper Canvas -->
+                        <Border x:Name="PrintCanvas" Background="White" Width="{Binding PaperPixelWidth}" MinHeight="{Binding PaperPixelHeight}" 
+                                CornerRadius="4" Padding="18" TextElement.Foreground="#0F172A" TextElement.FontFamily="Segoe UI, Tahoma, Arial">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.5" Color="#000000" />
+                            </Border.Effect>
+                            <Border.LayoutTransform>
+                                <ScaleTransform ScaleX="{Binding ZoomScale}" ScaleY="{Binding ZoomScale}" />
+                            </Border.LayoutTransform>
+
+                            <Grid>
+                                <!-- ========================================================================= -->
+                                <!-- 1. LUXURY STUDIO INVOICE (مطابق لنموذج استديو الفن 3 المرفق في الصورة) -->
+                                <!-- ========================================================================= -->
+                                <StackPanel Style="{StaticResource InvoiceOnlyStyle}">
+                                    <!-- 1. Deep Burgundy Header Banner with 2 Circular Photos and Center Typography -->
+                                    <Border Background="#6B0B2E" CornerRadius="16" Padding="12,10" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="96" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="96" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Left Photo Circle: Bride & Groom Portrait (Pink Border) -->
+                                            <Border Grid.Column="0" Width="88" Height="88" CornerRadius="44" BorderBrush="#F472B6" BorderThickness="3" ClipToBounds="True" Background="#500720">
+                                                <Image Source="{Binding LeftHeaderImage}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+                                            </Border>
+
+                                            <!-- Center: Studio Branding & Number Pill -->
+                                            <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="8,0">
+                                                <!-- Arabic Studio Name -->
+                                                <TextBlock Text="إستديو الفن 3" FontSize="26" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" TextAlignment="Center" />
+                                                <!-- English Studio Name with Spaced Letters -->
+                                                <TextBlock Text="S  t  u  d  i  o     A  l  f  a  n" FontSize="12" FontWeight="Bold" Foreground="#FBCFE8" HorizontalAlignment="Center" Margin="0,1,0,0" />
+                                                <!-- Description -->
+                                                <TextBlock Text="للتصوير السريع والطباعة والإعلان" FontSize="12" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" Margin="0,2,0,0" />
+
+                                                <!-- Number Pill Badge (White with Pink Border) -->
+                                                <Border Background="White" BorderBrush="#F472B6" BorderThickness="2" CornerRadius="14" Padding="20,3" HorizontalAlignment="Center" Margin="0,6,0,0">
+                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                        <TextBlock Text="الرقم : " FontSize="13" FontWeight="Black" Foreground="#6B0B2E" />
+                                                        <TextBlock Text="{Binding DocumentData.DocumentNumber}" FontSize="13" FontWeight="Black" Foreground="#6B0B2E" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <!-- Right Photo Circle: Printing Machine / Banner Shop (Pink Border) -->
+                                            <Border Grid.Column="2" Width="88" Height="88" CornerRadius="44" BorderBrush="#F472B6" BorderThickness="3" ClipToBounds="True" Background="#500720">
+                                                <Image Source="{Binding RightHeaderImage}" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="HighQuality" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- 2. Date and Delivery Date Bar -->
+                                    <Border Background="White" BorderBrush="#F472B6" BorderThickness="1.5" CornerRadius="10" Padding="14,6" Margin="0,0,0,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding DateFormattedPill, StringFormat='التاريخ:  {0}'}" FontSize="13" FontWeight="Bold" Foreground="#6B0B2E" HorizontalAlignment="Right" />
+                                            <TextBlock Grid.Column="1" Text="{Binding DeliveryDateFormatted, StringFormat='موعد التسليم :  {0}'}" FontSize="13" FontWeight="Bold" Foreground="#6B0B2E" HorizontalAlignment="Left" />
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- 3. Customer Name Bar -->
+                                    <Border Background="White" BorderBrush="#F472B6" BorderThickness="1.5" CornerRadius="10" Padding="14,6" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                <TextBlock Text="الإســــم /  " FontSize="13" FontWeight="Bold" Foreground="#6B0B2E" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding DocumentData.RecipientName}" FontSize="14" FontWeight="Black" Foreground="#500720" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                                                <TextBlock Text="هاتف العميل: " FontSize="12" FontWeight="Bold" Foreground="#6B0B2E" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding DocumentData.RecipientPhone}" FontSize="12" FontWeight="Black" Foreground="#500720" VerticalAlignment="Center" Margin="4,0,0,0" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- 4. Main Body Card with Pink Border -->
+                                    <Border Background="#FFF7F9" BorderBrush="#F472B6" BorderThickness="2" CornerRadius="16" Padding="10" Margin="0,0,0,8">
+                                        <StackPanel>
+                                            <!-- Row 1 Headers (3 Burgundy Boxes) -->
+                                            <UniformGrid Columns="3" Margin="0,0,0,4">
+                                                <Border Background="#6B0B2E" CornerRadius="8" Padding="6,6" Margin="4,0">
+                                                    <TextBlock Text="{Binding Dept1Title}" FontSize="14" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" />
+                                                </Border>
+                                                <Border Background="#6B0B2E" CornerRadius="8" Padding="6,6" Margin="4,0">
+                                                    <TextBlock Text="{Binding Dept2Title}" FontSize="14" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" />
+                                                </Border>
+                                                <Border Background="#6B0B2E" CornerRadius="8" Padding="6,6" Margin="4,0">
+                                                    <TextBlock Text="{Binding Dept3Title}" FontSize="14" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" />
+                                                </Border>
+                                            </UniformGrid>
+
+                                            <!-- Row 1 Values (White Boxes) -->
+                                            <UniformGrid Columns="3" Margin="0,0,0,8">
+                                                <Border Background="White" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Height="46" Margin="4,0" Padding="6">
+                                                    <TextBlock Text="{Binding Dept1Value}" FontSize="12" FontWeight="Bold" Foreground="#500720" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                                                </Border>
+                                                <Border Background="White" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Height="46" Margin="4,0" Padding="6">
+                                                    <TextBlock Text="{Binding Dept2Value}" FontSize="12" FontWeight="Bold" Foreground="#500720" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                                                </Border>
+                                                <Border Background="White" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Height="46" Margin="4,0" Padding="6">
+                                                    <TextBlock Text="{Binding Dept3Value}" FontSize="12" FontWeight="Bold" Foreground="#500720" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                                                </Border>
+                                            </UniformGrid>
+
+                                            <!-- Row 2 Financial Headers (3 Burgundy Boxes) -->
+                                            <UniformGrid Columns="3" Margin="0,0,0,4">
+                                                <Border Background="#6B0B2E" CornerRadius="8" Padding="6,6" Margin="4,0">
+                                                    <TextBlock Text="إجمالي القيمه" FontSize="14" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" />
+                                                </Border>
+                                                <Border Background="#6B0B2E" CornerRadius="8" Padding="6,6" Margin="4,0">
+                                                    <TextBlock Text="المدفــــــــــــــوع" FontSize="14" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" />
+                                                </Border>
+                                                <Border Background="#6B0B2E" CornerRadius="8" Padding="6,6" Margin="4,0">
+                                                    <TextBlock Text="المتبـــــــــــــقي" FontSize="14" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" />
+                                                </Border>
+                                            </UniformGrid>
+
+                                            <!-- Row 2 Financial Values (White Boxes) -->
+                                            <UniformGrid Columns="3" Margin="0,0,0,8">
+                                                <Border Background="White" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Height="44" Margin="4,0">
+                                                    <TextBlock Text="{Binding DocumentData.TotalAmount, StringFormat='{}{0:N0} ريال'}" FontSize="15" FontWeight="Black" Foreground="#6B0B2E" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <Border Background="White" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Height="44" Margin="4,0">
+                                                    <TextBlock Text="{Binding DocumentData.PaidAmount, StringFormat='{}{0:N0} ريال'}" FontSize="15" FontWeight="Black" Foreground="#15803D" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                                <Border Background="White" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Height="44" Margin="4,0">
+                                                    <TextBlock Text="{Binding DocumentData.RemainingAmount, StringFormat='{}{0:N0} ريال'}" FontSize="15" FontWeight="Black" Foreground="#DC2626" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </UniformGrid>
+
+                                            <!-- Row 3 Notes Area with Watermark -->
+                                            <Border Background="White" BorderBrush="#F472B6" BorderThickness="1.5" CornerRadius="12" Height="130" Padding="12" Margin="4,0,4,8" ClipToBounds="True">
+                                                <Grid>
+                                                    <!-- Faint Watermark Logo Centered -->
+                                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.10">
+                                                        <TextBlock Text="📸" FontSize="56" HorizontalAlignment="Center" />
+                                                        <TextBlock Text="إستديو الفن 3" FontSize="28" FontWeight="Black" Foreground="#6B0B2E" HorizontalAlignment="Center" />
+                                                        <TextBlock Text="ALFAN STUDIO • للتصوير والطباعة والإعلان" FontSize="11" FontWeight="Bold" Foreground="#6B0B2E" HorizontalAlignment="Center" />
+                                                    </StackPanel>
+
+                                                    <!-- Notes Foreground Content -->
+                                                    <DockPanel LastChildFill="True">
+                                                        <TextBlock DockPanel.Dock="Top" Text="ملاحظـــة:" FontSize="13" FontWeight="Black" Foreground="#6B0B2E" Margin="0,0,0,4" />
+                                                        <TextBlock Text="{Binding DocumentData.Notes}" FontSize="12" Foreground="#334155" TextWrapping="Wrap" />
+                                                    </DockPanel>
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- Customer Number Pill Field -->
+                                            <Border Background="White" BorderBrush="#F472B6" BorderThickness="1.5" CornerRadius="14" Height="34" Margin="30,0,30,2" HorizontalAlignment="Center" Padding="20,4">
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <TextBlock Text="رقم العميل :  " FontSize="13" FontWeight="Black" Foreground="#6B0B2E" />
+                                                    <TextBlock Text="{Binding DocumentData.RecipientPhone}" FontSize="13" FontWeight="Black" Foreground="#6B0B2E" />
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- 5. Booking and Camera Rental Burgundy Bar -->
+                                    <Border Background="#6B0B2E" CornerRadius="8" Padding="12,5" Margin="0,0,0,8">
+                                        <TextBlock Text="خـــــــــاص بالحجز وتـــــــــأجير الكاميــــــــــــرات ( فديو - فوتوغراف)" FontSize="13" FontWeight="Black" Foreground="White" HorizontalAlignment="Center" />
+                                    </Border>
+
+                                    <!-- 6. Slogan Badge & Cashier Signature -->
+                                    <Grid Margin="0,0,0,6">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="توقيع أمين الصندوق :  ............................................" FontSize="12" FontWeight="Bold" Foreground="#6B0B2E" />
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Background="#6B0B2E" CornerRadius="10" Padding="12,4" HorizontalAlignment="Left">
+                                            <TextBlock Text="صمم في مكان خالي من الإزدحام لك ولعائلتك" FontSize="11" FontWeight="Bold" Foreground="White" />
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- 7. Policy Terms Bullet Points -->
+                                    <StackPanel Margin="6,0,6,8">
+                                        <TextBlock Text="● لا نضمن حفظ الافلام والصور بعد مرور (ثلاثون يوماً) من تاريخ التسليم المدون بهذه القسيمة ." FontSize="11" FontWeight="Bold" Foreground="#6B0B2E" />
+                                        <TextBlock Text="● يجب عليكم الإحتفاظ بهذه القسيمـــــة أو إعادتــــــــها إلينا لإستلام الصــــــور بدون صعوبة ." FontSize="11" FontWeight="Bold" Foreground="#6B0B2E" Margin="0,2,0,0" />
+                                    </StackPanel>
+
+                                    <!-- 8. Deep Burgundy Footer Bar -->
+                                    <Border Background="#6B0B2E" CornerRadius="8" Padding="16,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <TextBlock Text="📍 " FontSize="12" Foreground="White" />
+                                                <TextBlock Text="إب - القاعدة - خط ذي السفال" FontSize="12" FontWeight="Bold" Foreground="White" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left">
+                                                <TextBlock Text="📞 " FontSize="12" Foreground="White" />
+                                                <TextBlock Text="771000132" FontSize="13" FontWeight="Black" Foreground="White" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- ========================================================================= -->
+                                <!-- 2. OFFICIAL VOUCHER / STATEMENT TEMPLATE (للسندات والرواتب وكشوف الحسابات) -->
+                                <!-- ========================================================================= -->
+                                <StackPanel Style="{StaticResource NonInvoiceOnlyStyle}">
+                                    <!-- Unified Studio Header -->
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Studio Info -->
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding DocumentData.StudioName}" FontSize="22" FontWeight="Black" Foreground="#6B0B2E" />
+                                            <TextBlock Text="{Binding DocumentData.StudioAddress}" FontSize="12" Foreground="#475569" Margin="0,3,0,0" />
+                                            <TextBlock Text="{Binding DocumentData.StudioPhone, StringFormat='هاتف: {0}'}" FontSize="12" Foreground="#475569" Margin="0,2,0,0" />
+                                        </StackPanel>
+
+                                        <!-- Document Meta Badge -->
+                                        <Border Grid.Column="1" Background="#FFF5F7" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Padding="16,8" TextAlignment="Left">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DocumentData.DocumentTypeTitle}" FontSize="14" FontWeight="Bold" Foreground="#6B0B2E" HorizontalAlignment="Right" />
+                                                <TextBlock Text="{Binding DocumentData.DocumentNumber, StringFormat='الرقم: {0}'}" FontSize="12" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Right" Margin="0,4,0,0" />
+                                                <TextBlock Text="{Binding DocumentDateFormatted, StringFormat='التاريخ: {0}'}" FontSize="11" Foreground="#475569" HorizontalAlignment="Right" Margin="0,2,0,0" />
+                                                <TextBlock Text="{Binding DocumentData.Time, StringFormat='الوقت: {0}'}" FontSize="11" Foreground="#475569" HorizontalAlignment="Right" Margin="0,2,0,0" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <Separator Background="#6B0B2E" Height="2" Margin="0,0,0,16" />
+
+                                    <!-- Recipient & Details Box -->
+                                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,16">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding DocumentData.RecipientName, StringFormat='الاسم / المستفيد: {0}'}" FontSize="13" FontWeight="Bold" Foreground="#0F172A" />
+                                                <TextBlock Text="{Binding DocumentData.RecipientPhone, StringFormat='رقم الهاتف: {0}'}" FontSize="12" Foreground="#475569" Margin="0,4,0,0" />
+                                                <TextBlock Text="{Binding DocumentData.RecipientAddress, StringFormat='العنوان: {0}'}" FontSize="12" Foreground="#475569" Margin="0,4,0,0" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding DocumentData.PaymentMethodDisplay, StringFormat='طريقة السداد: {0}'}" FontSize="12" Foreground="#0F172A" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding DocumentData.CreatedByName, StringFormat='منشئ المستند: {0}'}" FontSize="12" Foreground="#475569" Margin="0,4,0,0" />
+                                                <TextBlock Text="{Binding DocumentData.DayName, StringFormat='اليوم: {0}'}" FontSize="12" Foreground="#D97706" FontWeight="Bold" Margin="0,4,0,0" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Items / Operations Table -->
+                                    <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Margin="0,0,0,16">
+                                        <DataGrid ItemsSource="{Binding DocumentData.Items}" AutoGenerateColumns="False" IsReadOnly="True"
+                                                  HeadersVisibility="Column" GridLinesVisibility="All" Background="White"
+                                                  BorderThickness="0" RowBackground="#FFFFFF" AlternatingRowBackground="#F8FAFC">
+                                            <DataGrid.ColumnHeaderStyle>
+                                                <Style TargetType="DataGridColumnHeader">
+                                                    <Setter Property="Background" Value="#6B0B2E" />
+                                                    <Setter Property="Foreground" Value="White" />
+                                                    <Setter Property="FontWeight" Value="Bold" />
+                                                    <Setter Property="Padding" Value="8,6" />
+                                                    <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                                </Style>
+                                            </DataGrid.ColumnHeaderStyle>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="#" Binding="{Binding Index}" Width="40" />
+                                                <DataGridTextColumn Header="البيان / الخدمة والتفاصيل" Binding="{Binding Description}" Width="*" />
+                                                <DataGridTextColumn Header="الكمية" Binding="{Binding Quantity}" Width="70" />
+                                                <DataGridTextColumn Header="سعر الوحدة" Binding="{Binding UnitPrice, StringFormat='{}{0:N0}'}" Width="100" />
+                                                <DataGridTextColumn Header="الإجمالي" Binding="{Binding TotalPrice, StringFormat='{}{0:N0}'}" Width="110" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Border>
+
+                                    <!-- Totals & Summary Box -->
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="280" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Notes & Terms -->
+                                        <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                            <TextBlock Text="ملاحظات وشروط الاستديو:" FontSize="12" FontWeight="Bold" Foreground="#334155" />
+                                            <TextBlock Text="{Binding DocumentData.Terms}" FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding DocumentData.Notes, StringFormat='ملاحظات إضافية: {0}'}" FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,4,0,0" />
+                                        </StackPanel>
+
+                                        <!-- Financial Totals -->
+                                        <Border Grid.Column="1" Background="#F8FAFC" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="8" Padding="12">
+                                            <StackPanel>
+                                                <Grid Margin="0,2">
+                                                    <TextBlock Text="المبلغ الإجمالي:" FontSize="13" Foreground="#475569" />
+                                                    <TextBlock Text="{Binding DocumentData.TotalAmount, StringFormat='{}{0:N0}'}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Left" Foreground="#0F172A" />
+                                                </Grid>
+                                                <Grid Margin="0,4">
+                                                    <TextBlock Text="المبلغ المدفوع:" FontSize="13" Foreground="#15803D" FontWeight="Bold" />
+                                                    <TextBlock Text="{Binding DocumentData.PaidAmount, StringFormat='{}{0:N0}'}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Left" Foreground="#15803D" />
+                                                </Grid>
+                                                <Separator Background="#CBD5E1" Margin="0,4" />
+                                                <Grid Margin="0,2">
+                                                    <TextBlock Text="المبلغ المتبقي:" FontSize="14" Foreground="#B91C1C" FontWeight="Black" />
+                                                    <TextBlock Text="{Binding DocumentData.RemainingAmount, StringFormat='{}{0:N0}'}" FontSize="14" FontWeight="Black" HorizontalAlignment="Left" Foreground="#B91C1C" />
+                                                </Grid>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Signatures Block -->
+                                    <Grid Margin="0,20,0,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                            <TextBlock Text="توقيع العميل / المستلم" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" />
+                                            <TextBlock Text="................................" FontSize="12" Foreground="#CBD5E1" Margin="0,18,0,0" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                            <TextBlock Text="توقيع المحاسب / الكاشير" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" />
+                                            <TextBlock Text="................................" FontSize="12" Foreground="#CBD5E1" Margin="0,18,0,0" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                            <TextBlock Text="ختم وتوقيع الإدارة العامة" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" />
+                                            <TextBlock Text="................................" FontSize="12" Foreground="#CBD5E1" Margin="0,18,0,0" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <TextBlock Text="{Binding FooterTimestamp}" FontSize="10" Foreground="#94A3B8" HorizontalAlignment="Center" Margin="0,16,0,0" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Control Settings Sidebar (Right) -->
+            <Border Grid.Column="1" Background="#1E293B" BorderBrush="#334155" BorderThickness="1,0,0,0" Padding="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="إعدادات وخيارات الطباعة" FontSize="14" FontWeight="Bold" Foreground="#F8FAFC" Margin="0,0,0,14" />
+
+                        <!-- Printer Selection -->
+                        <TextBlock Text="اختيار الطابعة المتصلة بالنظام:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,6" />
+                        <ComboBox ItemsSource="{Binding InstalledPrinters}" SelectedItem="{Binding SelectedPrinter}" 
+                                  Background="#0F172A" Foreground="White" Padding="8" Margin="0,0,0,14" />
+
+                        <!-- Copies Selection -->
+                        <TextBlock Text="عدد النسخ المطبوعة:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,6" />
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="65" />
+                            </Grid.ColumnDefinitions>
+                            <Button Content="1 نسخة" Command="{Binding SetCopiesCommand}" CommandParameter="1" Margin="0,0,4,0" Background="{Binding Copy1Bg}" Foreground="White" BorderThickness="0" Padding="4,6" Cursor="Hand" />
+                            <Button Grid.Column="1" Content="2 نسختين" Command="{Binding SetCopiesCommand}" CommandParameter="2" Margin="0,0,4,0" Background="{Binding Copy2Bg}" Foreground="White" BorderThickness="0" Padding="4,6" Cursor="Hand" />
+                            <Button Grid.Column="2" Content="3 نسخ" Command="{Binding SetCopiesCommand}" CommandParameter="3" Margin="0,0,4,0" Background="{Binding Copy3Bg}" Foreground="White" BorderThickness="0" Padding="4,6" Cursor="Hand" />
+                            <TextBox Grid.Column="3" Text="{Binding CustomCopies, UpdateSourceTrigger=PropertyChanged}" Background="#0F172A" Foreground="White" BorderBrush="#475569" TextAlignment="Center" VerticalContentAlignment="Center" FontWeight="Bold" />
+                        </Grid>
+
+                        <!-- Paper Size Selection -->
+                        <TextBlock Text="حجم ومقاس الورق:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,6" />
+                        <ComboBox SelectedIndex="{Binding SelectedPaperSizeIndex}" Background="#0F172A" Foreground="White" Padding="8" Margin="0,0,0,14">
+                            <ComboBoxItem Content="ورق رسمي A4 (210×297 مم)" />
+                            <ComboBoxItem Content="ورق A5 (148×210 مم)" />
+                            <ComboBoxItem Content="طابعة حرارية 80mm POS (إيصال)" />
+                            <ComboBoxItem Content="ورق Letter أمريكي" />
+                        </ComboBox>
+
+                        <!-- Orientation Selection -->
+                        <TextBlock Text="اتجاه الصفحة:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,6" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <RadioButton Content="عمودي (Portrait)" IsChecked="{Binding IsPortrait}" Foreground="White" Margin="0,0,16,0" />
+                            <RadioButton Content="أفقي (Landscape)" IsChecked="{Binding IsLandscape}" Foreground="White" />
+                        </StackPanel>
+
+                        <!-- Zoom Controls -->
+                        <TextBlock Text="التحكم في المعاينة والتكبير:" FontSize="12" Foreground="#94A3B8" Margin="0,0,0,6" />
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Button Content="🔍 - تصغير" Command="{Binding ZoomOutCommand}" Background="#334155" Foreground="White" BorderThickness="0" Padding="6" Margin="0,0,4,0" Cursor="Hand" />
+                            <Button Grid.Column="1" Content="100%" Command="{Binding ZoomResetCommand}" Background="#334155" Foreground="White" BorderThickness="0" Padding="6" Margin="0,0,4,0" Cursor="Hand" />
+                            <Button Grid.Column="2" Content="🔍 + تكبير" Command="{Binding ZoomInCommand}" Background="#334155" Foreground="White" BorderThickness="0" Padding="6" Cursor="Hand" />
+                        </Grid>
+
+                        <Separator Background="#334155" Margin="0,0,0,16" />
+
+                        <!-- Action Buttons -->
+                        <Button Content="🖨️ طباعة المستند الآن" Command="{Binding PrintNowCommand}" 
+                                Background="#16A34A" Foreground="White" BorderThickness="0" Padding="12" FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="8" />
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+
+                        <Button Content="💾 حفظ وتصدير PDF" Command="{Binding SavePdfCommand}" 
+                                Background="#2563EB" Foreground="White" BorderThickness="0" Padding="10" FontSize="13" FontWeight="Bold" Margin="0,0,0,10" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="8" />
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+
+                        <Button Content="إلغاء الأمر" Click="CloseButton_Click" 
+                                Background="#475569" Foreground="White" BorderThickness="0" Padding="8" FontSize="12" Cursor="Hand">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6" />
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,302 @@
+<UserControl x:Class="StudioManagement.WPF.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FlowDirection="RightToLeft">
+    
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="GoldAccentBrush" Color="#D97706" />
+        <SolidColorBrush x:Key="BrandPrimaryBrush" Color="#0B132B" />
+        <SolidColorBrush x:Key="CardBrush" Color="#1E293B" />
+        <SolidColorBrush x:Key="BorderLightBrush" Color="#334155" />
+        <SolidColorBrush x:Key="TextLightBrush" Color="#F8FAFC" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#94A3B8" />
+        
+        <Style x:Key="TabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Padding" Value="16,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{StaticResource TextLightBrush}" />
+            <Setter Property="Background" Value="#162544" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource GoldAccentBrush}" />
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#F59E0B" />
+                                <Setter Property="Foreground" Value="#0F172A" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="#F59E0B" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="38" />
+            <Setter Property="Background" Value="#0D1B36" />
+            <Setter Property="Foreground" Value="{StaticResource TextLightBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderLightBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top Header & Page Close Button -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="40" Height="40" CornerRadius="10" Background="{StaticResource GoldAccentBrush}" Margin="0,0,12,0">
+                    <TextBlock Text="⚙️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="إعدادات الاستديو والنظام والمستخدمين" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" />
+                    <TextBlock Text="تعديل بيانات الاستديو والشعار واسم مدير النظام ومنح الصلاحيات يدوياً للكاشيرات" FontSize="12" Foreground="{StaticResource TextMutedBrush}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- ✕ Close Page Button (closes current view, does not exit app) -->
+            <Button Content="✕ إغلاق" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                    Background="#334155" Foreground="White" FontWeight="Bold" FontSize="12" Padding="14,6" BorderThickness="0" Cursor="Hand" />
+        </Grid>
+
+        <!-- Tab Selection Strip -->
+        <Border Grid.Row="1" Background="{StaticResource CardBrush}" CornerRadius="12" Padding="8" Margin="0,0,0,16" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+            <WrapPanel Orientation="Horizontal">
+                <RadioButton Content="🏢 بيانات الاستديو والشعار" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=0}" />
+                <RadioButton Content="👑 بيانات النظام واسم المدير" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=1}" />
+                <RadioButton Content="👥 المستخدمون والصلاحيات (تخويل الكاشير)" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=2}" />
+                <RadioButton Content="🔒 كلمة المرور" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=3}" />
+                <RadioButton Content="💾 النسخ الاحتياطي" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=4}" />
+            </WrapPanel>
+        </Border>
+
+        <!-- Tab Content Viewport -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- SECTION 1: STUDIO INFORMATION -->
+                <Border Background="{StaticResource CardBrush}" CornerRadius="14" Padding="24" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="بيانات الاستديو المركزية (Dynamic Studio Info)" FontSize="16" FontWeight="Bold" Foreground="{StaticResource GoldAccentBrush}" Margin="0,0,0,16" />
+
+                        <!-- Logo Section -->
+                        <Border Background="#0D1B36" CornerRadius="12" Padding="16" Margin="0,0,0,20" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Logo Preview Box -->
+                                <Border Grid.Column="0" Width="100" Height="100" CornerRadius="16" Background="#162544" BorderBrush="{StaticResource GoldAccentBrush}" BorderThickness="2" Margin="0,0,16,0">
+                                    <Grid>
+                                        <TextBlock Text="📸" FontSize="42" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="شعار وصورة الاستديو الرسمية" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="تظهر هذه الصورة في أعلى شاشة الدخول، الفواتير، السندات، وتقارير النظام الرسمية." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,12" />
+
+                                    <WrapPanel Orientation="Horizontal">
+                                        <Button Content="📁 رفع صورة / تغيير" Command="{Binding UploadLogoCommand}" Background="{StaticResource GoldAccentBrush}" Foreground="#0F172A" FontWeight="Bold" FontSize="12" Padding="12,6" BorderThickness="0" Margin="0,0,8,0" Cursor="Hand" />
+                                        <Button Content="👁️ معاينة الصورة" Command="{Binding PreviewLogoCommand}" Background="#1E3A8A" Foreground="White" FontWeight="Bold" FontSize="12" Padding="12,6" BorderThickness="0" Margin="0,0,8,0" Cursor="Hand" />
+                                        <Button Content="🗑️ حذف الصورة" Command="{Binding DeleteLogoCommand}" Background="#DC2626" Foreground="White" FontWeight="Bold" FontSize="12" Padding="12,6" BorderThickness="0" Cursor="Hand" />
+                                    </WrapPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Studio Input Form -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="20" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Row 0: Studio Name & Manager Name -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,12">
+                                <TextBlock Text="اسم الاستديو (يظهر في جميع الشاشات والفواتير):" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding StudioName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,12">
+                                <TextBlock Text="اسم مدير النظام (System Manager Name):" FontSize="12" FontWeight="Bold" Foreground="{StaticResource GoldAccentBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding SystemManagerName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+
+                            <!-- Row 1: Address & Tagline -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,0,12">
+                                <TextBlock Text="عنوان الاستديو:" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,12">
+                                <TextBlock Text="شعار/وصف الاستديو المختصر:" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding Tagline, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+
+                            <!-- Row 2: Phone 1 & Phone 2 -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,0,12">
+                                <TextBlock Text="رقم الهاتف الرئيسي:" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,0,12">
+                                <TextBlock Text="رقم الهاتف الثاني / واتساب:" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding SecondaryPhone, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+
+                            <!-- Row 3: Email & Description -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,0,12">
+                                <TextBlock Text="البريد الإلكتروني:" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,0,0,12">
+                                <TextBlock Text="وصف إضافي ومعلومات الترخيص:" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,4" />
+                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Action Buttons -->
+                        <WrapPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Content="💾 حفظ بيانات الاستديو" Command="{Binding SaveSettingsCommand}" Background="{StaticResource GoldAccentBrush}" Foreground="#0F172A" FontWeight="Bold" FontSize="13" Padding="18,10" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand" />
+                            <Button Content="🔄 إعادة تحميل" Command="{Binding LoadSettingsCommand}" Background="#1E3A8A" Foreground="White" FontWeight="Bold" FontSize="13" Padding="16,10" BorderThickness="0" Margin="0,0,10,0" Cursor="Hand" />
+                            <Button Content="❌ إلغاء التعديلات" Command="{Binding CancelSettingsCommand}" Background="#475569" Foreground="White" FontWeight="Bold" FontSize="13" Padding="16,10" BorderThickness="0" Cursor="Hand" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- SECTION 2: USERS & PERMISSIONS (MANUAL AUTHORIZATION) -->
+                <Border Background="{StaticResource CardBrush}" CornerRadius="14" Padding="24" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="👥 المستخدمون والصلاحيات وتخويل الكاشير يدويًا" FontSize="16" FontWeight="Bold" Foreground="{StaticResource GoldAccentBrush}" Margin="0,0,8,0" />
+                        <TextBlock Text="يستطيع مدير النظام تحديد صلاحيات كل كاشير وموظف بدقة لمنعه أو السماح له بفتح أقسام النظام." FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,16" />
+
+                        <!-- User Selector Row -->
+                        <Border Background="#0D1B36" CornerRadius="12" Padding="16" Margin="0,0,0,20">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="280" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="اختر المستخدم لتعديل صلاحياته:" VerticalAlignment="Center" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,12,0" />
+                                
+                                <ComboBox Grid.Column="1" ItemsSource="{Binding UsersList}" SelectedItem="{Binding SelectedUser}" Height="38" FontSize="13">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding FullName, StringFormat='{0}'}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                                    <TextBlock Text="الدور الوظيفي: " Foreground="{StaticResource TextMutedBrush}" />
+                                    <TextBlock Text="{Binding SelectedUser.RoleName}" FontWeight="Bold" Foreground="{StaticResource GoldAccentBrush}" Margin="0,0,16,0" />
+                                    <TextBlock Text="رقم المستخدم: " Foreground="{StaticResource TextMutedBrush}" />
+                                    <TextBlock Text="{Binding SelectedUser.UserNumber, StringFormat='#{0}'}" FontWeight="Bold" Foreground="#10B981" />
+                                </StackPanel>
+
+                                <!-- Quick Toggle Buttons -->
+                                <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                    <Button Content="تحديد الكل" Command="{Binding SelectAllPermissionsCommand}" Background="#334155" Foreground="White" FontSize="11" Padding="10,5" Margin="0,0,6,0" BorderThickness="0" Cursor="Hand" />
+                                    <Button Content="إلغاء الكل" Command="{Binding ClearAllPermissionsCommand}" Background="#334155" Foreground="White" FontSize="11" Padding="10,5" BorderThickness="0" Cursor="Hand" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Categorized Granular Permissions Checklist -->
+                        <TextBlock Text="قائمة الصلاحيات المتاحة (قم بتفعيل الصلاحيات المطلوبة):" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,12" />
+
+                        <Border Background="#0D1B36" CornerRadius="12" Padding="16" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
+                            <ItemsControl ItemsSource="{Binding PermissionsList}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Width="260" Margin="6" Padding="10" Background="#162544" CornerRadius="8" BorderBrush="#334155" BorderThickness="1">
+                                            <StackPanel>
+                                                <CheckBox IsChecked="{Binding IsSelected}" Content="{Binding Description}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" />
+                                                <TextBlock Text="{Binding Module, StringFormat='القسم: {0}'}" FontSize="10" Foreground="{StaticResource GoldAccentBrush}" Margin="20,4,0,0" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
+
+                        <!-- Prominent Authorize Button -->
+                        <Border Margin="0,20,0,0" Padding="16" Background="#13233F" CornerRadius="12" BorderBrush="{StaticResource GoldAccentBrush}" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="حفظ واعتماد الصلاحيات المحددة (تخويل فعلي)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" />
+                                    <TextBlock Text="يتم ربط هذه الصلاحيات بالمستخدم مباشرة في قاعدة البيانات لمنع فتح الأقسام غير المصرح بها." FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+
+                                <!-- 🔐 تخويل BUTTON -->
+                                <Button Grid.Column="1" Content="🔐 تخويل وحفظ الصلاحيات" Command="{Binding AuthorizeUserCommand}" 
+                                        Background="{StaticResource GoldAccentBrush}" Foreground="#0F172A" FontWeight="Black" FontSize="14" Padding="24,12" BorderThickness="0" Cursor="Hand" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- SECTION 3: BACKUP & DATA RESET -->
+                <Border Background="{StaticResource CardBrush}" CornerRadius="14" Padding="24" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="💾 إدارة النسخ الاحتياطي وتصفير البيانات" FontSize="16" FontWeight="Bold" Foreground="{StaticResource GoldAccentBrush}" Margin="0,0,8,0" />
+                        <TextBlock Text="حفظ قاعدة البيانات محلياً في مجلد C:\StudioBackups أو تصفير السجلات السابقة للبدء بإدخال بيانات جديدة." FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,16" />
+
+                        <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Button Content="💾 أخذ نسخة احتياطية الآن" Command="{Binding CreateBackupCommand}" Background="#1E3A8A" Foreground="White" FontWeight="Bold" FontSize="13" Padding="20,10" BorderThickness="0" Margin="0,0,12,0" Cursor="Hand" />
+                            <Button Content="🗑️ تصفير وحذف البيانات السابقة للبدء من جديد" Command="{Binding ResetAllDataCommand}" Background="#991B1B" Foreground="White" FontWeight="Bold" FontSize="13" Padding="20,10" BorderThickness="0" Cursor="Hand" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- STATUS MESSAGE STRIP -->
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#10B981" FontWeight="Bold" FontSize="13" TextAlignment="Center" Margin="0,0,0,16" />
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

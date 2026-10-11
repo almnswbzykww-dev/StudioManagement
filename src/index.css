@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Cairo", Tahoma, sans-serif;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-feature-settings: "lnum" 1, "tnum" 1;
+    font-feature-settings: "lnum" 1, "tnum" 1;
+    background-color: #0b1120;
+    color: #f8fafc;
+    direction: rtl;
+    text-align: right;
+    overflow-x: hidden;
+  }
+
+  /* Ensure all inputs and numbers use standard English digits 0-9 */
+  input, select, textarea, [dir="ltr"], .font-mono, .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    -webkit-font-feature-settings: "lnum" 1, "tnum" 1;
+    font-feature-settings: "lnum" 1, "tnum" 1;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Print Rules for Perfect Invoices and Reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  header, aside, .print\:hidden, nav, button {
+    display: none !important;
+  }
+
+  #printable-invoice, #printable-report, #printable-voucher {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}

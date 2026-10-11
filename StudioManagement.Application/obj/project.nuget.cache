@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "bLSZqx52CfRc8X9W16jzQr6iBZyKcNuESgO7E1whsJAeNaR+KGK0DOQnsbimyTDoUFc95775unn2MiI9zV+w/Q==",
+  "success": true,
+  "projectFilePath": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj",
+  "expectedPackageFiles": [
+    "/root/.nuget/packages/fluentvalidation/11.11.0/fluentvalidation.11.11.0.nupkg.sha512"
+  ],
+  "logs": []
+}

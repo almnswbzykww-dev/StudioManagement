@@ -1,0 +1,366 @@
+{
+  "format": 1,
+  "restore": {
+    "/app/applet/StudioManagement.WPF/StudioManagement.WPF.csproj": {}
+  },
+  "projects": {
+    "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj",
+        "projectName": "StudioManagement.Application",
+        "projectPath": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.Application/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[11.11.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj",
+        "projectName": "StudioManagement.Domain",
+        "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.Domain/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/app/applet/StudioManagement.Infrastructure/StudioManagement.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.Infrastructure/StudioManagement.Infrastructure.csproj",
+        "projectName": "StudioManagement.Infrastructure",
+        "projectPath": "/app/applet/StudioManagement.Infrastructure/StudioManagement.Infrastructure.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.Infrastructure/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj"
+              },
+              "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "FluentValidation": {
+              "target": "Package",
+              "version": "[11.11.0, )"
+            },
+            "Microsoft.Data.SqlClient": {
+              "target": "Package",
+              "version": "[5.2.2, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.8, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj",
+        "projectName": "StudioManagement.Reports",
+        "projectPath": "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.Reports/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj"
+              },
+              "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.102.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/app/applet/StudioManagement.WPF/StudioManagement.WPF.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/app/applet/StudioManagement.WPF/StudioManagement.WPF.csproj",
+        "projectName": "StudioManagement.WPF",
+        "projectPath": "/app/applet/StudioManagement.WPF/StudioManagement.WPF.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/app/applet/StudioManagement.WPF/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0-windows"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0-windows7.0": {
+            "targetAlias": "net8.0-windows",
+            "projectReferences": {
+              "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Application/StudioManagement.Application.csproj"
+              },
+              "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj"
+              },
+              "/app/applet/StudioManagement.Infrastructure/StudioManagement.Infrastructure.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Infrastructure/StudioManagement.Infrastructure.csproj"
+              },
+              "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj": {
+                "projectPath": "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0-windows7.0": {
+          "targetAlias": "net8.0-windows",
+          "dependencies": {
+            "CommunityToolkit.Mvvm": {
+              "target": "Package",
+              "version": "[8.4.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.131/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

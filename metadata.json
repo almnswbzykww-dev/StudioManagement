@@ -1,0 +1,6 @@
+{
+  "name": "StudioManagement - استديو التصوير والطباعة",
+  "description": "نظام إدارة استديو التصوير والطباعة المتكامل - Studio Management System",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
