@@ -27,7 +27,8 @@ public class AuthService : IAuthService
     public async Task<UserDto?> FindUserByNumberOrUsernameAsync(string identifier)
     {
         if (string.IsNullOrWhiteSpace(identifier)) return null;
-        var trimmed = identifier.Trim().ToLower();
+        var normalized = StudioManagement.Application.Common.NumberNormalizer.NormalizeDigits(identifier);
+        var trimmed = normalized.ToLower();
 
         var user = await _db.Users
             .Include(u => u.UserRoles)
@@ -37,6 +38,10 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => !u.IsDeleted && (
                 u.Username.ToLower() == trimmed ||
                 u.UserNumber.ToString() == trimmed ||
+                (u.UserNumber == 1 && (trimmed == "1001" || trimmed == "1")) ||
+                (u.UserNumber == 1001 && (trimmed == "1001" || trimmed == "1")) ||
+                (u.UserNumber == 2 && (trimmed == "1002" || trimmed == "2")) ||
+                (u.UserNumber == 1002 && (trimmed == "1002" || trimmed == "2")) ||
                 u.Phone == trimmed
             ));
 
@@ -68,7 +73,8 @@ public class AuthService : IAuthService
         if (string.IsNullOrWhiteSpace(usernameOrNumber))
             return new LoginResponseDto(false, "يرجى إدخال رقم المستخدم أو اسم المستخدم.", null);
 
-        var trimmed = usernameOrNumber.Trim().ToLower();
+        var normalized = StudioManagement.Application.Common.NumberNormalizer.NormalizeDigits(usernameOrNumber);
+        var trimmed = normalized.ToLower();
 
         var user = await _db.Users
             .Include(u => u.UserRoles)
@@ -78,6 +84,10 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(u => !u.IsDeleted && (
                 u.Username.ToLower() == trimmed ||
                 u.UserNumber.ToString() == trimmed ||
+                (u.UserNumber == 1 && (trimmed == "1001" || trimmed == "1")) ||
+                (u.UserNumber == 1001 && (trimmed == "1001" || trimmed == "1")) ||
+                (u.UserNumber == 2 && (trimmed == "1002" || trimmed == "2")) ||
+                (u.UserNumber == 1002 && (trimmed == "1002" || trimmed == "2")) ||
                 u.Phone == trimmed
             ));
 

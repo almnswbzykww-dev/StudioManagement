@@ -18,8 +18,10 @@ import {
   X, 
   Calendar,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Printer
 } from 'lucide-react';
+import { CustomerStatementModal } from '../common/CustomerStatementModal';
 
 interface CustomersPageProps {
   onClose: () => void;
@@ -38,6 +40,7 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [statementCustomer, setStatementCustomer] = useState<Customer | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
@@ -223,6 +226,13 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                     <td className="py-3 px-4">
                       <div className="flex items-center justify-center gap-1">
                         <button
+                          onClick={() => setStatementCustomer(customer)}
+                          className="p-1.5 text-amber-400 hover:text-amber-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                          title="طباعة كشف حساب العميل"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => setSelectedCustomer(customer)}
                           className="p-1.5 text-blue-400 hover:text-blue-300 hover:bg-slate-800 rounded-lg cursor-pointer"
                           title="عرض كشف وتفاصيل العميل"
@@ -285,12 +295,27 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setSelectedCustomer(null)}
-                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const cust = selectedCustomer;
+                      setSelectedCustomer(null);
+                      setStatementCustomer(cust);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer shadow-sm"
+                    title="طباعة كشف حساب معتمد ومفصل"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>طباعة كشف الحساب</span>
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedCustomer(null)}
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               <div className="p-6 max-h-[75vh] overflow-y-auto space-y-6">
@@ -394,7 +419,19 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
 
               </div>
 
-              <div className="flex items-center justify-end px-6 py-3.5 bg-slate-800 border-t border-slate-700">
+              <div className="flex items-center justify-between px-6 py-3.5 bg-slate-800 border-t border-slate-700">
+                <button
+                  onClick={() => {
+                    const cust = selectedCustomer;
+                    setSelectedCustomer(null);
+                    setStatementCustomer(cust);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer shadow-md shadow-amber-500/20"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>طباعة كشف الحساب / PDF</span>
+                </button>
+
                 <button
                   onClick={() => setSelectedCustomer(null)}
                   className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold cursor-pointer"
@@ -511,6 +548,15 @@ export const CustomersPage: React.FC<CustomersPageProps> = ({
               </form>
             </div>
           </div>
+        )}
+
+        {/* Customer Account Statement Modal */}
+        {statementCustomer && (
+          <CustomerStatementModal
+            isOpen={!!statementCustomer}
+            onClose={() => setStatementCustomer(null)}
+            customer={statementCustomer}
+          />
         )}
 
       </div>

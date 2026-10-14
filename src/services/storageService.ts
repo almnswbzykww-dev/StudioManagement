@@ -209,12 +209,28 @@ class StorageService {
     return authFlag === 'true';
   }
 
+  public static normalizeDigits(input: string | number | undefined | null): string {
+    if (input === undefined || input === null) return '';
+    const str = String(input).trim();
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    let res = str;
+    for (let i = 0; i <= 9; i++) {
+      res = res.replaceAll(arabicDigits[i], String(i)).replaceAll(persianDigits[i], String(i));
+    }
+    return res;
+  }
+
   public login(identifier: string, password: string): { success: boolean; message: string; user?: User } {
-    const trimmed = identifier.trim().toLowerCase();
+    const normalized = StorageService.normalizeDigits(identifier).toLowerCase();
+    const trimmed = normalized;
     const user = this.state.users.find(
       u => u.username.toLowerCase() === trimmed ||
            String(u.userNumber) === trimmed ||
+           (u.userNumber === 1 && (trimmed === '1001' || trimmed === '1')) ||
+           (u.userNumber === 2 && (trimmed === '1002' || trimmed === '2')) ||
            u.id.toLowerCase() === trimmed ||
+           u.id.replace('u-', '') === trimmed ||
            u.phone.replace(/[^0-9]/g, '') === trimmed.replace(/[^0-9]/g, '') ||
            u.fullName.toLowerCase() === trimmed
     );

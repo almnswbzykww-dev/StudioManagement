@@ -213,6 +213,8 @@ public partial class MainViewModel : ObservableObject
         if (!_currentUser.HasPermission("Settings:System") && !_currentUser.HasPermission("Settings:StudioInfo") && !_currentUser.HasPermission("Settings:Users"))
         {
             ShowPermissionWarning("إعدادات الاستديو والمستخدمين");
+            return;
+        }
         CurrentViewModel = (SettingsViewModel)_serviceProvider.GetService(typeof(SettingsViewModel))!;
     }
 
@@ -392,12 +394,29 @@ public partial class LoginViewModel : ObservableObject
     [ObservableProperty] private string? _studioLogoBase64;
     [ObservableProperty] private ObservableCollection<UserDto> _availableUsers = new();
 
+    [ObservableProperty] private string _currentDateFormatted = DateTime.Now.ToString("yyyy-MM-dd");
+    [ObservableProperty] private string _currentTimeFormatted = DateTime.Now.ToString("hh:mm:ss tt");
+    [ObservableProperty] private string _currentDayArabic = DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("ar-SA"));
+
     public LoginViewModel(IAuthService auth, ICurrentUserService currentUser, IStudioSettingsService settingsService, IServiceProvider sp)
     {
         _auth = auth;
         _currentUser = currentUser;
         _settingsService = settingsService;
         _sp = sp;
+
+        try
+        {
+            var clockTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            clockTimer.Tick += (s, e) =>
+            {
+                CurrentDateFormatted = DateTime.Now.ToString("yyyy-MM-dd");
+                CurrentTimeFormatted = DateTime.Now.ToString("hh:mm:ss tt");
+                CurrentDayArabic = DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("ar-SA"));
+            };
+            clockTimer.Start();
+        }
+        catch { }
 
         Task.Run(async () =>
         {
@@ -448,6 +467,12 @@ public partial class LoginViewModel : ObservableObject
 
     partial void OnUserNumberChanged(string value)
     {
+        var normalized = StudioManagement.Application.Common.NumberNormalizer.NormalizeDigits(value);
+        if (normalized != value)
+        {
+            UserNumber = normalized;
+            return;
+        }
         SearchUserCommand.Execute(null);
     }
 
@@ -465,6 +490,8 @@ public partial class LoginViewModel : ObservableObject
     private async Task LoginAsync(Window window)
     {
         var targetIdentifier = !string.IsNullOrWhiteSpace(Username) ? Username : UserNumber;
+        targetIdentifier = StudioManagement.Application.Common.NumberNormalizer.NormalizeDigits(targetIdentifier);
+
         if (string.IsNullOrWhiteSpace(targetIdentifier))
         {
             ErrorMessage = "يرجى إدخال رقم المستخدم أو اسم المستخدم.";
@@ -494,6 +521,37 @@ public partial class LoginViewModel : ObservableObject
         else
         {
             ErrorMessage = res.Message;
+        }
+    }
+
+    [RelayCommand]
+    private void MinimizeWindow(Window? win)
+    {
+        if (win != null)
+        {
+            win.WindowState = WindowState.Minimized;
+        }
+    }
+
+    [RelayCommand]
+    private void MaximizeWindow(Window? win)
+    {
+        if (win != null)
+        {
+            win.WindowState = win.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+    }
+
+    [RelayCommand]
+    private void CloseWindow(Window? win)
+    {
+        if (win != null)
+        {
+            win.Close();
+        }
+        else
+        {
+            Application.Current?.Shutdown();
         }
     }
 }
@@ -533,6 +591,7 @@ public partial class DashboardViewModel : ObservableObject
 public partial class CustomersViewModel : ObservableObject
 {
     private readonly ICustomerService _customerService;
+    private readonly IPrintService? _printService;
 
     [ObservableProperty] private ObservableCollection<CustomerDto> _customers = new();
     [ObservableProperty] private CustomerDto? _selectedCustomer;
@@ -543,9 +602,10 @@ public partial class CustomersViewModel : ObservableObject
     [ObservableProperty] private string _formAddress = string.Empty;
     [ObservableProperty] private string _formNotes = string.Empty;
 
-    public CustomersViewModel(ICustomerService customerService)
+    public CustomersViewModel(ICustomerService customerService, IPrintService? printService = null)
     {
         _customerService = customerService;
+        _printService = printService;
         SearchCommand.Execute(null);
     }
 
@@ -592,6 +652,25 @@ public partial class CustomersViewModel : ObservableObject
         {
             await _customerService.DeleteAsync(customer.Id);
             await SearchAsync();
+        }
+    }
+
+    [RelayCommand]
+    private async Task PrintCustomerStatementAsync(CustomerDto? customer)
+    {
+        var target = customer ?? SelectedCustomer;
+        if (target == null || _printService == null) return;
+
+        try
+        {
+            var data = await _printService.PrepareCustomerStatementPrintDataAsync(target.Id);
+            var vm = new PrintPreviewViewModel(data, _printService);
+            var win = new Views.PrintPreviewWindow(vm) { Owner = Application.Current?.MainWindow };
+            win.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"خطأ في تجهيز كشف حساب العميل: {ex.Message}", "خطأ في الطباعة", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
@@ -714,6 +793,12 @@ public partial class OrdersViewModel : ObservableObject
 
         IsPaymentOpen = false;
         await LoadOrdersAsync();
+    }
+
+    [RelayCommand]
+    private void ClosePayment()
+    {
+        IsPaymentOpen = false;
     }
 
     private static string GetWalletArabicName(WalletType w) => w switch

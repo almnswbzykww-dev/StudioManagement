@@ -82,11 +82,11 @@
         <!-- Tab Selection Strip -->
         <Border Grid.Row="1" Background="{StaticResource CardBrush}" CornerRadius="12" Padding="8" Margin="0,0,0,16" BorderBrush="{StaticResource BorderLightBrush}" BorderThickness="1">
             <WrapPanel Orientation="Horizontal">
-                <RadioButton Content="🏢 بيانات الاستديو والشعار" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=0}" />
-                <RadioButton Content="👑 بيانات النظام واسم المدير" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=1}" />
-                <RadioButton Content="👥 المستخدمون والصلاحيات (تخويل الكاشير)" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=2}" />
-                <RadioButton Content="🔒 كلمة المرور" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=3}" />
-                <RadioButton Content="💾 النسخ الاحتياطي" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=4}" />
+                <RadioButton Content="🏢 بيانات الاستديو والشعار" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter=0}" />
+                <RadioButton Content="👑 بيانات النظام واسم المدير" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter=1}" />
+                <RadioButton Content="👥 المستخدمون والصلاحيات (تخويل الكاشير)" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter=2}" />
+                <RadioButton Content="🔒 كلمة المرور" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter=3}" />
+                <RadioButton Content="💾 النسخ الاحتياطي" Style="{StaticResource TabButtonStyle}" IsChecked="{Binding SelectedTab, Converter={StaticResource EqualityConverter}, ConverterParameter=4}" />
             </WrapPanel>
         </Border>
 
@@ -216,7 +216,7 @@
                                 <ComboBox Grid.Column="1" ItemsSource="{Binding UsersList}" SelectedItem="{Binding SelectedUser}" Height="38" FontSize="13">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding FullName, StringFormat='{0}'}" />
+                                            <TextBlock Text="{Binding FullName}" />
                                         </DataTemplate>
                                     </ComboBox.ItemTemplate>
                                 </ComboBox>

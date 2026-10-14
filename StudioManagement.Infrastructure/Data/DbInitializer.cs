@@ -1,3 +1,5 @@
+using System.Data;
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using StudioManagement.Domain.Entities;
 using StudioManagement.Domain.Enums;
@@ -6,10 +8,496 @@ namespace StudioManagement.Infrastructure.Data;
 
 public static class DbInitializer
 {
+    private class ColumnDef
+    {
+        public string Name { get; set; } = string.Empty;
+        public string SqlServerType { get; set; } = string.Empty;
+        public string SqliteType { get; set; } = string.Empty;
+        public string DefaultSqlServer { get; set; } = string.Empty;
+        public string DefaultSqlite { get; set; } = string.Empty;
+        public bool IsNullable { get; set; }
+    }
+
+    private class TableDef
+    {
+        public string Name { get; set; } = string.Empty;
+        public List<ColumnDef> Columns { get; set; } = new();
+    }
+
+    private static readonly List<TableDef> TargetTables = new()
+    {
+        new TableDef { Name = "Users", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "UserNumber", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Username", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "PasswordHash", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "FullName", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Phone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "IsActive", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "LastLoginAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "DirectPermissionsJson", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "Roles", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Name", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+        } },
+        new TableDef { Name = "Permissions", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Key", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Module", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+        } },
+        new TableDef { Name = "UserRoles", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "UserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "RoleId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+        } },
+        new TableDef { Name = "RolePermissions", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "RoleId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "PermissionId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+        } },
+        new TableDef { Name = "Customers", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "CustomerNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Name", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Phone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "SecondaryPhone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Address", SqlServerType = "NVARCHAR(300)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "Orders", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "OrderNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "CustomerId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "ServiceType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "ServiceTitle", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Subtotal", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Discount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "TotalAmount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "PaidAmount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "RemainingAmount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Status", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "OrderDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "DeliveryDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "DeliveryTime", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "CreatedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "AssignedToUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "OrderItems", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "OrderId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "ServiceType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Title", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Quantity", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "UnitPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "TotalPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "DetailsJson", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "OrderStatusHistories", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "OrderId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "OldStatus", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "NewStatus", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "ChangedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+        } },
+        new TableDef { Name = "Payments", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "OrderId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "PaymentDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "Method", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "WalletType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "WalletName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "TransactionNumber", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "TransferNumber", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "SenderName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "SenderPhone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "ReceivedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+        } },
+        new TableDef { Name = "ProductCategories", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Name", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "Products", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Code", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Name", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "CategoryId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Unit", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "CurrentQuantity", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "MinimumQuantity", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "CostPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "SellingPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Location", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "SupplierName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "InventoryTransactions", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "ProductId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Type", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Quantity", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "PreviousQuantity", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "NewQuantity", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "UnitPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Reference", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "PerformedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+        } },
+        new TableDef { Name = "Suppliers", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "SupplierNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Name", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "CompanyName", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Phone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Address", SqlServerType = "NVARCHAR(300)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Category", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "TotalPurchases", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "TotalPaid", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "BalanceDebt", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "Purchases", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "PurchaseNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "SupplierId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "TotalAmount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "PaidAmount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "RemainingAmount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "PurchaseDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "PaymentMethod", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "InvoiceReference", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "CreatedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+        } },
+        new TableDef { Name = "PurchaseItems", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "PurchaseId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "ProductId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Quantity", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "UnitPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "TotalPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+        } },
+        new TableDef { Name = "Expenses", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "VoucherNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Category", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "ExpenseDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "Recipient", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "PaymentMethod", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "WalletType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "RecordedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+        } },
+        new TableDef { Name = "Employees", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "EmpNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Name", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Role", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Phone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "HireDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "BaseSalary", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "InitialDebt", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "IsActive", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "EmployeeDebts", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "DebtNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "EmployeeId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Date", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "Reason", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "IsSettled", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "SettledAmount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "RecordedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "EmployeePayments", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "PaymentNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "EmployeeId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Date", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "PaymentMethod", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "WalletType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "RelatedDebtId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "RecordedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "SalaryAdvances", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "AdvanceNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "EmployeeId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "AdvanceDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "MonthTarget", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "IsDeducted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "DeductedFromSalaryId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "ApprovedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+        } },
+        new TableDef { Name = "Salaries", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "PaymentNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "EmployeeId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "MonthYear", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "BaseSalary", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Allowances", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Deductions", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "AdvancesDeducted", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "NetSalary", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "PaymentDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "PaymentMethod", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "PaidByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+        } },
+        new TableDef { Name = "StudioSettings", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "StudioName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "'استديو الفن 3'", DefaultSqlite = "'استديو الفن 3'", IsNullable = false },
+            new ColumnDef { Name = "SystemManagerName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Tagline", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Address", SqlServerType = "NVARCHAR(300)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Phone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "SecondaryPhone", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Whatsapp", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Email", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "CrNumber", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Currency", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "'ريال يمني'", DefaultSqlite = "'ريال يمني'", IsNullable = false },
+            new ColumnDef { Name = "LogoPath", SqlServerType = "NVARCHAR(300)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "LogoBase64", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "InvoiceTitle", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "InvoiceSubtitle", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "InvoiceFooterNote", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "ReceiptFooter", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "InvoiceTerms", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "PrintSize", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "'A4'", DefaultSqlite = "'A4'", IsNullable = false },
+            new ColumnDef { Name = "EnableOrderNotifications", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "EnableDeliveryDeadlineAlerts", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "EnablePaymentAlerts", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "EnableFinancialAlerts", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "EnableBackupAlerts", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "DaysBeforeDeliveryAlert", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "2", DefaultSqlite = "2", IsNullable = false },
+        } },
+        new TableDef { Name = "StudioServices", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "ServiceType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Name", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Icon", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "ImagePath", SqlServerType = "NVARCHAR(300)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "DisplayOrder", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "IsActive", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "DefaultPrice", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+        } },
+        new TableDef { Name = "AuditLogs", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Action", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Module", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Details", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "UserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "UserName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Metadata", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "Vouchers", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "VoucherNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Type", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Date", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "Time", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "BeneficiaryOrPayer", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "AmountWords", SqlServerType = "NVARCHAR(300)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "PaymentMethod", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "WalletType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "TransactionReference", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "RelatedCustomerId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "RelatedEmployeeId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "RelatedSupplierId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "RelatedOrderId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "CreatedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "CashboxTransactions", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "TransactionNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Date", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "Time", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Type", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Category", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "PaymentMethod", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "WalletType", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "Reference", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "BalanceAfter", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "VoucherId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "CreatedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "Accounts", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "AccountCode", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "AccountName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Category", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "CurrentBalance", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "IsActive", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "AccountTransactions", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "AccountId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Date", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "Time", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Description", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Debit", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Credit", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "BalanceAfter", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "ReferenceNumber", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "EmployeeDeductions", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "DeductionNumber", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "EmployeeId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Amount", SqlServerType = "DECIMAL(18,2)", SqliteType = "TEXT", DefaultSqlServer = "0", DefaultSqlite = "'0'", IsNullable = false },
+            new ColumnDef { Name = "Date", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "MonthYear", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Reason", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "IsAppliedToSalary", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "RecordedByUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "BackupHistories", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "FileName", SqlServerType = "NVARCHAR(250)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "FilePath", SqlServerType = "NVARCHAR(500)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "BackupDate", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "FileSizeBytes", SqlServerType = "BIGINT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Type", SqlServerType = "NVARCHAR(50)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "IsSuccessful", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "1", DefaultSqlite = "1", IsNullable = false },
+            new ColumnDef { Name = "CreatedByUserName", SqlServerType = "NVARCHAR(150)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Notes", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+        new TableDef { Name = "Notifications", Columns = new List<ColumnDef> {
+            new ColumnDef { Name = "Id", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "", DefaultSqlite = "", IsNullable = false },
+            new ColumnDef { Name = "CreatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "(GETDATE())", DefaultSqlite = "'2026-01-01 00:00:00'", IsNullable = false },
+            new ColumnDef { Name = "UpdatedAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsDeleted", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Title", SqlServerType = "NVARCHAR(200)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Message", SqlServerType = "NVARCHAR(MAX)", SqliteType = "TEXT", DefaultSqlServer = "''", DefaultSqlite = "''", IsNullable = false },
+            new ColumnDef { Name = "Type", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "Priority", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "IsRead", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "ReadAt", SqlServerType = "DATETIME2", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "IsArchived", SqlServerType = "BIT", SqliteType = "INTEGER", DefaultSqlServer = "0", DefaultSqlite = "0", IsNullable = false },
+            new ColumnDef { Name = "RelatedEntityId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "RelatedEntityType", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "ActionTarget", SqlServerType = "NVARCHAR(100)", SqliteType = "TEXT", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+            new ColumnDef { Name = "TargetUserId", SqlServerType = "INT", SqliteType = "INTEGER", DefaultSqlServer = "NULL", DefaultSqlite = "NULL", IsNullable = true },
+        } },
+    };
+
     public static async Task SeedAsync(StudioDbContext context)
     {
-        await context.Database.EnsureCreatedAsync();
+        // 1. Ensure schema is synchronized and all missing tables/columns are added non-destructively
+        await SynchronizeSchemaSafelyAsync(context);
 
+        // 2. Initial Seeding if database is empty
         if (!await context.Users.AnyAsync())
         {
             var adminRole = new Role { Name = "مدير النظام", Description = "صلاحيات إدارية وفنية ومالية كاملة" };
@@ -386,4 +874,102 @@ public static class DbInitializer
             }
         }
     }
+
+    public static async Task SynchronizeSchemaSafelyAsync(StudioDbContext context)
+    {
+        try
+        {
+            // Create tables that do not exist yet without modifying or dropping existing tables
+            await context.Database.EnsureCreatedAsync();
+
+            var conn = context.Database.GetDbConnection();
+            if (conn.State != ConnectionState.Open)
+            {
+                await conn.OpenAsync();
+            }
+
+            bool isSqlite = context.Database.IsSqlite();
+
+            foreach (var table in TargetTables)
+            {
+                var existingCols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                if (isSqlite)
+                {
+                    using var cmd = conn.CreateCommand();
+                    cmd.CommandText = $"PRAGMA table_info('{table.Name}');";
+                    try
+                    {
+                        using var reader = await cmd.ExecuteReaderAsync();
+                        while (await reader.ReadAsync())
+                        {
+                            var colName = reader["name"]?.ToString();
+                            if (!string.IsNullOrEmpty(colName))
+                            {
+                                existingCols.Add(colName);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                else
+                {
+                    // SQL Server
+                    using var cmd = conn.CreateCommand();
+                    cmd.CommandText = $"SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{table.Name}';";
+                    try
+                    {
+                        using var reader = await cmd.ExecuteReaderAsync();
+                        while (await reader.ReadAsync())
+                        {
+                            var colName = reader["COLUMN_NAME"]?.ToString();
+                            if (!string.IsNullOrEmpty(colName))
+                            {
+                                existingCols.Add(colName);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                if (existingCols.Count == 0) continue;
+
+                // Add any missing column safely with ALTER TABLE
+                foreach (var col in table.Columns)
+                {
+                    if (col.Name.Equals("Id", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (existingCols.Contains(col.Name)) continue;
+
+                    try
+                    {
+                        using var alterCmd = conn.CreateCommand();
+                        if (isSqlite)
+                        {
+                            string nullability = col.IsNullable ? "" : (string.IsNullOrEmpty(col.DefaultSqlite) ? "" : $" DEFAULT {col.DefaultSqlite}");
+                            alterCmd.CommandText = $"ALTER TABLE [{table.Name}] ADD COLUMN [{col.Name}] {col.SqliteType}{nullability};";
+                        }
+                        else
+                        {
+                            // SQL Server
+                            string defaultClause = string.IsNullOrEmpty(col.DefaultSqlServer) || col.DefaultSqlServer == "NULL"
+                                ? "" 
+                                : $" CONSTRAINT [DF_{table.Name}_{col.Name}] DEFAULT {col.DefaultSqlServer}";
+                            string nullClause = col.IsNullable ? "NULL" : "NOT NULL";
+                            alterCmd.CommandText = $"ALTER TABLE [{table.Name}] ADD [{col.Name}] {col.SqlServerType} {defaultClause} {nullClause};";
+                        }
+                        await alterCmd.ExecuteNonQueryAsync();
+                    }
+                    catch
+                    {
+                        // Safe fallback - column might already exist or concurrent update
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Schema synchronization notice: {ex.Message}");
+        }
+    }
+
 }

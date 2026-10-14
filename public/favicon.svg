@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#0B1329" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Golden Crown & Accents Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="30%" stop-color="#F59E0B" />
+      <stop offset="70%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <!-- Camera Body Gradient -->
+    <linearGradient id="camBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+
+    <!-- Lens Glass Gradient -->
+    <radialGradient id="lensGlass" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.9" />
+      <stop offset="35%" stop-color="#0284C7" stop-opacity="0.95" />
+      <stop offset="75%" stop-color="#0369A1" />
+      <stop offset="100%" stop-color="#082F49" />
+    </radialGradient>
+
+    <!-- Glow Effect -->
+    <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#F59E0B" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- App Rounded Squircle Container -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="6" />
+
+  <!-- Outer Golden Halo Circle -->
+  <circle cx="256" cy="265" r="176" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" stroke-dasharray="8 6" opacity="0.4" />
+
+  <!-- Camera Body -->
+  <g filter="url(#dropShadow)">
+    <!-- Pentaprism Top Housing -->
+    <path d="M196 160 L226 120 L286 120 L316 160 Z" fill="#1E293B" stroke="url(#goldGrad)" stroke-width="4" stroke-linejoin="round" />
+    <!-- Flash / Viewfinder Element -->
+    <rect x="238" y="132" width="36" height="16" rx="4" fill="url(#goldGrad)" />
+
+    <!-- Main Camera Body -->
+    <rect x="100" y="160" width="312" height="210" rx="40" fill="url(#camBodyGrad)" stroke="url(#goldGrad)" stroke-width="6" />
+
+    <!-- Grip Accent on Right (LTR visual) -->
+    <rect x="372" y="180" width="28" height="170" rx="14" fill="#334155" opacity="0.6" />
+    <line x1="386" y1="205" x2="386" y2="325" stroke="url(#goldGrad)" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Shutter Button -->
+    <rect x="136" y="142" width="38" height="18" rx="6" fill="url(#goldGrad)" />
+    <!-- Mode Dial -->
+    <rect x="338" y="146" width="32" height="14" rx="4" fill="#64748B" />
+
+    <!-- Red Recording LED Indicator -->
+    <circle cx="140" cy="195" r="8" fill="#EF4444" stroke="#FECACA" stroke-width="2" />
+    <circle cx="140" cy="195" r="14" fill="#EF4444" opacity="0.3" />
+
+    <!-- Lens Outer Metallic Rings -->
+    <circle cx="256" cy="265" r="92" fill="#0B1329" stroke="url(#goldGrad)" stroke-width="6" />
+    <circle cx="256" cy="265" r="80" fill="#0F172A" stroke="#475569" stroke-width="3" />
+    <circle cx="256" cy="265" r="70" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.7" />
+
+    <!-- Optical Lens Elements & Reflections -->
+    <circle cx="256" cy="265" r="62" fill="url(#lensGlass)" />
+    
+    <!-- Lens Reflection Arc -->
+    <path d="M216 235 C230 215 260 212 282 222" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" opacity="0.75" />
+    <circle cx="288" cy="235" r="6" fill="#FFFFFF" opacity="0.85" />
+    <path d="M228 295 C244 308 270 306 284 296" fill="none" stroke="#38BDF8" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+
+    <!-- Center Aperture Blades Effect -->
+    <circle cx="256" cy="265" r="26" fill="#021324" stroke="url(#goldGrad)" stroke-width="2" />
+    <circle cx="256" cy="265" r="10" fill="url(#goldGrad)" />
+  </g>
+
+  <!-- Crown of Excellence Floating Above Camera -->
+  <g filter="url(#goldGlow)">
+    <path d="M210 98 L224 64 L256 82 L288 64 L302 98 Z" fill="url(#goldGrad)" stroke="#FEF3C7" stroke-width="2" stroke-linejoin="round" />
+    <!-- Crown Jewels -->
+    <circle cx="224" cy="62" r="4.5" fill="#FEF3C7" />
+    <circle cx="256" cy="80" r="4.5" fill="#FEF3C7" />
+    <circle cx="288" cy="62" r="4.5" fill="#FEF3C7" />
+  </g>
+
+  <!-- Golden Stars & Sparkles -->
+  <g fill="url(#goldGrad)">
+    <polygon points="90,110 94,124 108,128 94,132 90,146 86,132 72,128 86,124" />
+    <polygon points="420,115 423,126 434,129 423,132 420,143 417,132 406,129 417,126" />
+    <polygon points="395,385 397,392 404,394 397,396 395,403 393,396 386,394 393,392" />
+    <polygon points="115,380 117,387 124,389 117,391 115,398 113,391 106,389 113,387" />
+  </g>
+
+  <!-- Elegant Bottom Ribbon / Arabic Studio Subtext -->
+  <text x="256" y="445" font-family="system-ui, -apple-system, Cairo, Segoe UI, sans-serif" font-size="26" font-weight="900" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="4">
+    STUDIO PRO
+  </text>
+</svg>

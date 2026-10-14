@@ -32,6 +32,20 @@ public partial class LoginWindow : Window
         }
     }
 
+    private void UserNumberBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (sender is TextBox tb && !string.IsNullOrEmpty(tb.Text))
+        {
+            var normalized = StudioManagement.Application.Common.NumberNormalizer.NormalizeDigits(tb.Text);
+            if (normalized != tb.Text)
+            {
+                int caret = tb.CaretIndex;
+                tb.Text = normalized;
+                tb.CaretIndex = Math.Min(caret, tb.Text.Length);
+            }
+        }
+    }
+
     private void PassBox_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)

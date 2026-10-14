@@ -27,10 +27,13 @@
                 <DataGridTextColumn Header="إجمالي المبيعات" Binding="{Binding TotalSpent, StringFormat='{}{0:N0}'}" Width="110" />
                 <DataGridTextColumn Header="المدفوع" Binding="{Binding TotalPaid, StringFormat='{}{0:N0}'}" Width="110" />
                 <DataGridTextColumn Header="المتبقي" Binding="{Binding TotalRemaining, StringFormat='{}{0:N0}'}" Width="110" />
-                <DataGridTemplateColumn Header="إجراءات" Width="100">
+                <DataGridTemplateColumn Header="إجراءات" Width="170">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="حذف" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="{StaticResource BrandDangerBrush}" Foreground="White" BorderThickness="0" Padding="8,2" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="🖨️ كشف حساب" Command="{Binding DataContext.PrintCustomerStatementCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="#0284C7" Foreground="White" BorderThickness="0" Padding="8,2" Margin="0,0,6,0" Cursor="Hand" />
+                                <Button Content="حذف" Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Background="{StaticResource BrandDangerBrush}" Foreground="White" BorderThickness="0" Padding="8,2" Cursor="Hand" />
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

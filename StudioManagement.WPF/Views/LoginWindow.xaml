@@ -2,11 +2,12 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding StudioName, StringFormat='تسجيل الدخول - {0}'}"
-        Height="720" Width="560"
+        Height="740" Width="580"
+        MinWidth="480" MinHeight="620"
         WindowStartupLocation="CenterScreen"
         FlowDirection="RightToLeft"
         Background="#080F1E"
-        ResizeMode="CanMinimize"
+        ResizeMode="CanResizeWithGrip"
         WindowStyle="SingleBorderWindow">
     
     <Window.Resources>
@@ -92,90 +93,123 @@
             </Ellipse.Fill>
         </Ellipse>
 
-        <!-- Centered Camera Viewfinder Card -->
-        <Border MaxWidth="480" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24"
-                Background="#EE0B162C" BorderBrush="{StaticResource GoldBorderBrush}" BorderThickness="2" CornerRadius="28" Padding="32,28">
-            <Border.Effect>
-                <DropShadowEffect Color="#F59E0B" BlurRadius="35" Opacity="0.25" ShadowDepth="0" />
-            </Border.Effect>
-
-            <StackPanel>
-                <!-- Camera Emblem / Studio Logo -->
-                <Border Width="80" Height="80" CornerRadius="22" Background="#1A2744" BorderBrush="{StaticResource GoldBorderBrush}" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,12">
-                    <Grid>
-                        <TextBlock Text="👑" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,4,0,0" />
-                        <TextBlock Text="📸" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0" />
-                    </Grid>
-                </Border>
-
-                <!-- Dynamic Studio Title from Settings -->
-                <TextBlock Text="{Binding StudioName}" FontSize="24" FontWeight="Black" Foreground="{StaticResource TextLightBrush}" HorizontalAlignment="Center" TextAlignment="Center" />
-                
-                <!-- Dynamic Tagline from Settings -->
-                <TextBlock Text="{Binding StudioTagline}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource GoldBorderBrush}" HorizontalAlignment="Center" Margin="0,4,0,16" TextAlignment="Center" />
-
-                <!-- Date & Live Indicator -->
-                <Border Background="#0D1B36" CornerRadius="8" Padding="12,5" HorizontalAlignment="Center" Margin="0,0,0,20">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="⚡ نظام إدارة الاستديو المتكامل • يعمل أوفلاين 100%" FontSize="11" Foreground="{StaticResource TextMutedBrush}" FontWeight="SemiBold" />
-                    </StackPanel>
-                </Border>
-
-                <!-- 1. User Number Field -->
-                <TextBlock Text="رقم المستخدم:" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,6" />
-                <TextBox x:Name="UserNumberBox" Text="{Binding UserNumber, UpdateSourceTrigger=PropertyChanged}" 
-                         Style="{StaticResource InputTextBoxStyle}" KeyDown="UserNumberBox_KeyDown" />
-
-                <!-- User Autocomplete Chips (Click to auto-populate number and username) -->
-                <ItemsControl ItemsSource="{Binding AvailableUsers}" Margin="0,6,0,12">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Content="{Binding UserNumber, StringFormat='#{0}'}" Command="{Binding DataContext.SelectUserChipCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"
-                                    Margin="0,0,6,4" Padding="8,3" Background="#162746" Foreground="#F59E0B" FontWeight="Bold" FontSize="11" BorderBrush="#334155" BorderThickness="1" Cursor="Hand">
-                                <Button.ToolTip>
-                                    <TextBlock Text="{Binding FullName}" />
-                                </Button.ToolTip>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <!-- 2. Username Field (Auto-detected and displayed when UserNumber is entered) -->
-                <Grid Margin="0,0,0,6">
-                    <TextBlock Text="اسم المستخدم (يظهر تلقائياً عند إدخال الرقم):" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" HorizontalAlignment="Right" />
-                    <!-- Visual Verification Indicator -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Visibility="{Binding IsUserDetected, Converter={x:Static BooleanToVisibilityConverter.True}}">
-                        <TextBlock Text="✓ تم التعرف: " FontSize="11" Foreground="#10B981" FontWeight="Bold" />
-                        <TextBlock Text="{Binding DetectedUserName}" FontSize="11" Foreground="#10B981" FontWeight="Bold" />
-                    </StackPanel>
-                </Grid>
-                <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,16" />
-
-                <!-- 3. Password Field -->
-                <TextBlock Text="كلمة المرور (اضغط Enter للدخول):" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,6" />
-                <PasswordBox x:Name="PassBox" Style="{StaticResource InputPasswordBoxStyle}" PasswordChanged="PassBox_PasswordChanged" KeyDown="PassBox_KeyDown" Margin="0,0,0,20" />
-
-                <!-- 4. Big Golden Login Button -->
-                <Button Content="تسجيل الدخول ⮑" Command="{Binding LoginCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                        Height="48" Background="{StaticResource GoldAccentBrush}" Foreground="#080F1E" FontWeight="Black" FontSize="16" BorderThickness="0" Cursor="Hand" Margin="0,0,0,8">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="14" />
-                        </Style>
-                    </Button.Resources>
-                </Button>
-
-                <!-- Error Notice -->
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontWeight="Bold" FontSize="12" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,4,0,0" />
-
-                <!-- Footer Developer Note -->
-                <TextBlock Text="بإبداعنا .. نصنع أجمل اللحظات" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,16,0,0" />
-            </StackPanel>
+        <!-- Top Right Window Control Bar (Minimize, Maximize/Restore, Close) -->
+        <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16,14" Panel.ZIndex="100">
+            <Border Background="#0F172A" CornerRadius="8" Padding="4,2" BorderBrush="#334155" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight">
+                    <!-- Minimize Button (-) -->
+                    <Button Content="—" Command="{Binding MinimizeWindowCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                            Width="30" Height="26" Background="Transparent" Foreground="#94A3B8" BorderThickness="0" FontWeight="Bold" FontSize="11" Cursor="Hand" ToolTip="تصغير النافذة (-)" />
+                    
+                    <!-- Maximize / Restore Button (□) -->
+                    <Button Content="▢" Command="{Binding MaximizeWindowCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                            Width="30" Height="26" Background="Transparent" Foreground="#94A3B8" BorderThickness="0" FontWeight="Bold" FontSize="13" Cursor="Hand" ToolTip="تكبير / استعادة الحجم (□)" />
+                    
+                    <!-- Close Button (✕) -->
+                    <Button Content="✕" Command="{Binding CloseWindowCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                            Width="30" Height="26" Background="#DC2626" Foreground="White" BorderThickness="0" FontWeight="Bold" FontSize="12" Cursor="Hand" ToolTip="إغلاق البرنامج (✕)">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6" />
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Border>
         </Border>
+
+        <!-- Responsive ScrollViewer to ensure complete layout visibility on all screens -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="12">
+            <!-- Centered Camera Viewfinder Card -->
+            <Border MaxWidth="490" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16,40,16,24"
+                    Background="#EE0B162C" BorderBrush="{StaticResource GoldBorderBrush}" BorderThickness="2" CornerRadius="28" Padding="32,28">
+                <Border.Effect>
+                    <DropShadowEffect Color="#F59E0B" BlurRadius="35" Opacity="0.25" ShadowDepth="0" />
+                </Border.Effect>
+
+                <StackPanel>
+                    <!-- Camera Emblem / Studio Logo -->
+                    <Border Width="80" Height="80" CornerRadius="22" Background="#1A2744" BorderBrush="{StaticResource GoldBorderBrush}" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <Grid>
+                            <TextBlock Text="👑" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,4,0,0" />
+                            <TextBlock Text="📸" FontSize="36" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,10,0,0" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Dynamic Studio Title from Settings -->
+                    <TextBlock Text="{Binding StudioName}" FontSize="24" FontWeight="Black" Foreground="{StaticResource TextLightBrush}" HorizontalAlignment="Center" TextAlignment="Center" />
+                    
+                    <!-- Dynamic Tagline from Settings -->
+                    <TextBlock Text="{Binding StudioTagline}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource GoldBorderBrush}" HorizontalAlignment="Center" Margin="0,4,0,16" TextAlignment="Center" />
+
+                    <!-- Live Date & Clock Row with Arabic Day & English Digits -->
+                    <Border Background="#0D1B36" CornerRadius="10" Padding="14,6" HorizontalAlignment="Center" Margin="0,0,0,16" BorderBrush="#334155" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding CurrentDayArabic}" Foreground="#F59E0B" FontWeight="Bold" FontSize="11" Margin="0,0,6,0" />
+                            <TextBlock Text="•" Foreground="#475569" Margin="0,0,6,0" />
+                            <TextBlock Text="{Binding CurrentDateFormatted}" Foreground="#F8FAFC" FontFamily="Consolas, Segoe UI" FontWeight="Bold" FontSize="11" Margin="0,0,6,0" />
+                            <TextBlock Text="•" Foreground="#475569" Margin="0,0,6,0" />
+                            <TextBlock Text="{Binding CurrentTimeFormatted}" Foreground="#F59E0B" FontFamily="Consolas, Segoe UI" FontWeight="Black" FontSize="11" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 1. User Number Field (English Digits Default) -->
+                    <TextBlock Text="رقم المستخدم (أرقام إنجليزية 0-9):" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,6" />
+                    <TextBox x:Name="UserNumberBox" Text="{Binding UserNumber, UpdateSourceTrigger=PropertyChanged}" 
+                             Language="en-US"
+                             Style="{StaticResource InputTextBoxStyle}" KeyDown="UserNumberBox_KeyDown" TextChanged="UserNumberBox_TextChanged" />
+
+                    <!-- User Autocomplete Chips (Click to auto-populate number and username) -->
+                    <ItemsControl ItemsSource="{Binding AvailableUsers}" Margin="0,6,0,12">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding UserNumber, StringFormat='#{0}'}" Command="{Binding DataContext.SelectUserChipCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}"
+                                        Margin="0,0,6,4" Padding="8,3" Background="#162746" Foreground="#F59E0B" FontWeight="Bold" FontSize="11" BorderBrush="#334155" BorderThickness="1" Cursor="Hand">
+                                    <Button.ToolTip>
+                                        <TextBlock Text="{Binding FullName}" />
+                                    </Button.ToolTip>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- 2. Username Field (Auto-detected and displayed when UserNumber is entered) -->
+                    <Grid Margin="0,0,0,6">
+                        <TextBlock Text="اسم المستخدم (يظهر تلقائياً عند إدخال الرقم):" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" HorizontalAlignment="Right" />
+                        <!-- Visual Verification Indicator -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Visibility="{Binding IsUserDetected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="✓ تم التعرف: " FontSize="11" Foreground="#10B981" FontWeight="Bold" />
+                            <TextBlock Text="{Binding DetectedUserName}" FontSize="11" Foreground="#10B981" FontWeight="Bold" />
+                        </StackPanel>
+                    </Grid>
+                    <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" Margin="0,0,0,16" />
+
+                    <!-- 3. Password Field -->
+                    <TextBlock Text="كلمة المرور (اضغط Enter للدخول):" FontSize="13" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" Margin="0,0,0,6" />
+                    <PasswordBox x:Name="PassBox" Style="{StaticResource InputPasswordBoxStyle}" PasswordChanged="PassBox_PasswordChanged" KeyDown="PassBox_KeyDown" Margin="0,0,0,20" />
+
+                    <!-- 4. Big Golden Login Button -->
+                    <Button Content="تسجيل الدخول ⮑" Command="{Binding LoginCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                            Height="48" Background="{StaticResource GoldAccentBrush}" Foreground="#080F1E" FontWeight="Black" FontSize="16" BorderThickness="0" Cursor="Hand" Margin="0,0,0,8">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="14" />
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+
+                    <!-- Error Notice -->
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontWeight="Bold" FontSize="12" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,4,0,0" />
+
+                    <!-- Footer Developer Note -->
+                    <TextBlock Text="بإبداعنا .. نصنع أجمل اللحظات" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,16,0,0" />
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
     </Grid>
 </Window>

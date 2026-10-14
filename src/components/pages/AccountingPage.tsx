@@ -5,6 +5,7 @@ import { PageShell } from '../common/PageShell';
 import { EmptyState } from '../common/EmptyState';
 import { InvoiceModal } from '../common/InvoiceModal';
 import { PrintVoucherModal, VoucherType } from '../common/PrintVoucherModal';
+import { WalletIcon } from '../common/WalletIcons';
 import { 
   CircleDollarSign, 
   Plus, 
@@ -891,7 +892,14 @@ export const AccountingPage: React.FC<AccountingPageProps> = ({ onClose, onEditO
                           </span>
                         </td>
                         <td className="py-3 px-4 text-slate-300 whitespace-nowrap">
-                          {p.walletName || '-'}
+                          {p.walletName ? (
+                            <div className="flex items-center gap-1.5">
+                              {p.walletType ? <WalletIcon type={p.walletType} size="sm" /> : null}
+                              <span>{p.walletName}</span>
+                            </div>
+                          ) : (
+                            '-'
+                          )}
                         </td>
                         <td className="py-3 px-4 font-mono text-amber-400 whitespace-nowrap">
                           {p.transactionNumber || '-'}

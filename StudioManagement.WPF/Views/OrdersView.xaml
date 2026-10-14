@@ -82,12 +82,12 @@
         </DataGrid>
 
         <!-- Payment Modal Overlay (with Wallets & Multi-Payment History) -->
-        <Grid Grid.RowSpan="2" Background="#CC000000" Visibility="{Binding IsPaymentOpen, Converter={x:Static BooleanToVisibilityConverter.True}}">
+        <Grid Grid.RowSpan="2" Background="#CC000000" Visibility="{Binding IsPaymentOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border MaxWidth="620" VerticalAlignment="Center" Background="#0F172A" BorderBrush="{StaticResource GoldAccentBrush}" BorderThickness="2" CornerRadius="20" Padding="24">
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <TextBlock Text="تسجيل دفعة للفاتورة (نقدي / محافظ بنكية)" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextLightBrush}" />
-                        <Button Content="✕" Click="{Binding IsPaymentOpen, Mode=OneWayToSource}" HorizontalAlignment="Left" Background="Transparent" Foreground="White" FontSize="16" BorderThickness="0" Cursor="Hand" />
+                        <Button Content="✕" Command="{Binding ClosePaymentCommand}" HorizontalAlignment="Left" Background="Transparent" Foreground="White" FontSize="16" BorderThickness="0" Cursor="Hand" />
                     </Grid>
 
                     <Border Background="#1E293B" CornerRadius="10" Padding="12" Margin="0,0,0,16">

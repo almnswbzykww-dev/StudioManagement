@@ -1,5 +1,8 @@
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Windows;
+using System.Windows.Markup;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +22,26 @@ public partial class App : System.Windows.Application
 
     public App()
     {
+        // 1. Force English Digits (0123456789) globally across all WPF views, DataGrids, TextBlocks, and StringFormat bindings
+        // while preserving complete Arabic UI, texts, and RTL layout
+        var customCulture = new CultureInfo("ar-SA")
+        {
+            NumberFormat = (NumberFormatInfo)CultureInfo.InvariantCulture.NumberFormat.Clone(),
+            DateTimeFormat = (DateTimeFormatInfo)CultureInfo.InvariantCulture.DateTimeFormat.Clone()
+        };
+        customCulture.NumberFormat.DigitSubstitution = DigitShapes.None;
+        customCulture.NumberFormat.NativeDigits = new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+
+        Thread.CurrentThread.CurrentCulture = customCulture;
+        Thread.CurrentThread.CurrentUICulture = customCulture;
+        CultureInfo.DefaultThreadCurrentCulture = customCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = customCulture;
+
+        // Apply en-US Language to FrameworkElement so WPF controls render digits in standard Latin form
+        FrameworkElement.LanguageProperty.OverrideMetadata(
+            typeof(FrameworkElement),
+            new FrameworkPropertyMetadata(XmlLanguage.GetLanguage("en-US"))
+        );
         // 24/7 Continuous Operation: Register Global Unhandled Exception Handlers
         this.DispatcherUnhandledException += (s, e) =>
         {
@@ -105,7 +128,22 @@ public partial class App : System.Windows.Application
                     }
                     else
                     {
-                        options.UseSqlite(sqliteConn);
+                        // Ensure fixed absolute path in AppDomain BaseDirectory so working directory changes never lose the database file
+                        string finalSqliteConn = sqliteConn;
+                        if (sqliteConn.Contains("Data Source=", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var parts = sqliteConn.Split("Data Source=", StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length > 0)
+                            {
+                                var rawPath = parts[0].Trim().TrimEnd(';');
+                                if (!Path.IsPathRooted(rawPath))
+                                {
+                                    var fixedPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, rawPath);
+                                    finalSqliteConn = $"Data Source={fixedPath}";
+                                }
+                            }
+                        }
+                        options.UseSqlite(finalSqliteConn);
                     }
                 });
 

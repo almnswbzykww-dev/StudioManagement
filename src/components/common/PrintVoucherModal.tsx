@@ -213,7 +213,7 @@ export const PrintVoucherModal: React.FC<PrintVoucherModalProps> = ({
                 <h1 className="text-xl md:text-2xl font-black text-rose-950 tracking-tight">
                   {settings.studioName}
                 </h1>
-                <p className="text-xs text-rose-800 font-semibold">{settings.englishName || 'Studio Alfan 3'} - {settings.tagline}</p>
+                <p className="text-xs text-rose-800 font-semibold">{settings.tagline || 'استوديو التصوير والإنتاج الفني'}</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-[11px] text-slate-600">
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3 h-3 text-rose-700 shrink-0" />

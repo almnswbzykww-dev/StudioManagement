@@ -8,6 +8,7 @@ public enum OrderStatus
     InPrinting,
     InMontage,
     Ready,
+    ReadyForDelivery,
     Delivered,
     Cancelled
 }
@@ -76,7 +77,9 @@ public enum AccountCategory
     Liability,  // خصوم (الموردون، الالتزامات)
     Equity,     // حقوق الملكية
     Revenue,    // إيرادات
-    Expense     // مصروفات
+    Expense,    // مصروفات
+    Cash,       // نقدية وخزينة
+    Bank        // بنوك ومحافظ إلكترونية
 }
 
 public enum NotificationType

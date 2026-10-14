@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "McNI3NzgVYrdrWHWBVQh1pFckERFJVkiO0dCBkuSZ2Dl2Rjqr2/rCl5mrtyts6CETyaDR+EBOK4wrW8vVDR9hg==",
+  "dgSpecHash": "rmmCrnI2dsk=",
   "success": true,
   "projectFilePath": "/app/applet/StudioManagement.Domain/StudioManagement.Domain.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/root/.nuget/packages/microsoft.windowsdesktop.app.ref/8.0.32/microsoft.windowsdesktop.app.ref.8.0.32.nupkg.sha512"
+  ],
   "logs": []
 }

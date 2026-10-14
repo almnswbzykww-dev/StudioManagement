@@ -1499,16 +1499,25 @@ export const EmployeesPage: React.FC<EmployeesPageProps> = ({ onClose }) => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 text-xs mb-1">طريقة الدفع</label>
+                  <label className="block text-slate-400 text-xs mb-1">طريقة الدفع / المحفظة</label>
                   <select
                     value={paymentMethod}
-                    onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-750 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                    onChange={e => setPaymentMethod(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-750 rounded-xl text-white focus:outline-none focus:border-emerald-500 text-xs font-semibold"
                   >
-                    <option value="cash">نقداً بالصندوق</option>
-                    <option value="kuraimi">بنك الكريمي</option>
-                    <option value="jawwali">محفظة جوالي</option>
-                    <option value="onecash">محفظة ون كاش</option>
+                    <option value="cash">💵 نقداً بالصندوق</option>
+                    <option value="kuraimi">🏦 بنك الكريمي / إم فلوس (Kuraimi)</option>
+                    <option value="jeeb">💳 محفظة جيب (Jeeb)</option>
+                    <option value="jawwali">📱 محفظة جوالي (Jawwali)</option>
+                    <option value="one_cash">⚡ محفظة ون كاش (OneCash)</option>
+                    <option value="floosak">💰 محفظة فلوسك (Floosak)</option>
+                    <option value="cash_wallet">💵 محفظة كاش (Cash)</option>
+                    <option value="pyes">🌟 محفظة بيس (PYes)</option>
+                    <option value="mobile_money">📲 محفظة موبايل موني (Mobile Money)</option>
+                    <option value="tadhamon_pay">🏛️ بنك التضامن / تضامن باي (Tadhamon)</option>
+                    <option value="qutaibi_banki">🏢 بنك القطيبي / بنكي (Al-Qutaibi)</option>
+                    <option value="shamel_money">💎 محفظة شامل موني (Shamel)</option>
+                    <option value="remittance">📦 حوالة صرافة محلية (Remittance)</option>
                   </select>
                 </div>
 
@@ -1583,15 +1592,25 @@ export const EmployeesPage: React.FC<EmployeesPageProps> = ({ onClose }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-400 text-xs mb-1">طريقة الصرف</label>
+                    <label className="block text-slate-400 text-xs mb-1">طريقة الصرف / المحفظة</label>
                     <select
                       value={salaryPaymentMethod}
-                      onChange={e => setSalaryPaymentMethod(e.target.value as PaymentMethod)}
-                      className="w-full px-3 py-2 bg-slate-950 border border-slate-750 rounded-xl text-white focus:outline-none focus:border-teal-500"
+                      onChange={e => setSalaryPaymentMethod(e.target.value as any)}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-750 rounded-xl text-white focus:outline-none focus:border-teal-500 text-xs font-semibold"
                     >
-                      <option value="cash">نقداً من الخزينة</option>
-                      <option value="kuraimi">حوالة بنك الكريمي</option>
-                      <option value="jawwali">محفظة جوالي</option>
+                      <option value="cash">💵 نقداً من الخزينة</option>
+                      <option value="kuraimi">🏦 بنك الكريمي / إم فلوس (Kuraimi)</option>
+                      <option value="jeeb">💳 محفظة جيب (Jeeb)</option>
+                      <option value="jawwali">📱 محفظة جوالي (Jawwali)</option>
+                      <option value="one_cash">⚡ محفظة ون كاش (OneCash)</option>
+                      <option value="floosak">💰 محفظة فلوسك (Floosak)</option>
+                      <option value="cash_wallet">💵 محفظة كاش (Cash)</option>
+                      <option value="pyes">🌟 محفظة بيس (PYes)</option>
+                      <option value="mobile_money">📲 محفظة موبايل موني (Mobile Money)</option>
+                      <option value="tadhamon_pay">🏛️ بنك التضامن / تضامن باي (Tadhamon)</option>
+                      <option value="qutaibi_banki">🏢 بنك القطيبي / بنكي (Al-Qutaibi)</option>
+                      <option value="shamel_money">💎 محفظة شامل موني (Shamel)</option>
+                      <option value="remittance">📦 حوالة صرافة محلية (Remittance)</option>
                     </select>
                   </div>
                 </div>
@@ -1671,7 +1690,7 @@ export const EmployeesPage: React.FC<EmployeesPageProps> = ({ onClose }) => {
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-slate-900 border border-amber-500/50 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
               {/* Modal Header */}
-              <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+              <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between print:hidden">
                 <div className="flex items-center gap-2">
                   <Printer className="w-5 h-5 text-amber-400" />
                   <h3 className="font-bold text-white text-base">
@@ -1681,19 +1700,19 @@ export const EmployeesPage: React.FC<EmployeesPageProps> = ({ onClose }) => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handlePrintStatement}
-                    className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 transition"
+                    className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md"
                   >
                     <Printer className="w-4 h-4" />
                     <span>طباعة كشف الحساب / PDF</span>
                   </button>
-                  <button onClick={() => setViewingStatementEmp(null)} className="p-1 text-slate-400 hover:text-white">
+                  <button onClick={() => setViewingStatementEmp(null)} className="p-1 text-slate-400 hover:text-white cursor-pointer">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              {/* Printable Body */}
-              <div className="p-6 overflow-y-auto space-y-6 text-slate-200">
+              {/* Printable Body with printable id */}
+              <div id="printable-employee-statement" className="p-6 overflow-y-auto space-y-6 text-slate-200">
                 {/* Official Header */}
                 <div className="border-b border-slate-800 pb-4 flex items-center justify-between">
                   <div>

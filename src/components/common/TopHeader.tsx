@@ -6,7 +6,6 @@ import {
   Clock, 
   Calendar, 
   ChevronDown, 
-  DownloadCloud, 
   ShieldCheck,
   Bell,
   Sun,
@@ -100,16 +99,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
     return unsubscribe;
   }, []);
 
-  const handleBackupExport = () => {
-    const jsonStr = storageService.exportBackupJson();
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `StudioManagement_Backup_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
 
   // Window Controls Handlers
   const handleMinimize = () => {
@@ -225,14 +214,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
           {/* Left: Backup, Theme Mode, User Profile, and Working Window Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
             
-            {/* Quick Backup Export Button */}
-            <button
-              onClick={handleBackupExport}
-              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs border border-slate-700 transition-all cursor-pointer"
-              title="تصدير نسخة احتياطية (JSON)"
-            >
-              <DownloadCloud className="w-4 h-4 text-emerald-400" />
-            </button>
 
             {/* Theme Toggle (Dark / Light) */}
             {onToggleTheme && (

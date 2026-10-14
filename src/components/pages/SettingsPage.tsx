@@ -419,7 +419,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onClose }) => {
     setIsResetting(true);
     try {
       // 1. Download automated backup
-      const backupJson = storageService.getBackupJson();
+      const backupJson = storageService.exportBackupJson();
       const blob = new Blob([backupJson], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

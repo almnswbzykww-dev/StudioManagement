@@ -1,0 +1,15 @@
+/app/applet/StudioManagement.Application/bin/Release/net8.0/StudioManagement.Application.deps.json
+/app/applet/StudioManagement.Application/bin/Release/net8.0/StudioManagement.Application.dll
+/app/applet/StudioManagement.Application/bin/Release/net8.0/StudioManagement.Application.pdb
+/app/applet/StudioManagement.Application/bin/Release/net8.0/StudioManagement.Domain.dll
+/app/applet/StudioManagement.Application/bin/Release/net8.0/StudioManagement.Domain.pdb
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioManagement.Application.csproj.AssemblyReference.cache
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioManagement.Application.GeneratedMSBuildEditorConfig.editorconfig
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioManagement.Application.AssemblyInfoInputs.cache
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioManagement.Application.AssemblyInfo.cs
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioManagement.Application.csproj.CoreCompileInputs.cache
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioMa.3A041E13.Up2Date
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioManagement.Application.dll
+/app/applet/StudioManagement.Application/obj/Release/net8.0/refint/StudioManagement.Application.dll
+/app/applet/StudioManagement.Application/obj/Release/net8.0/StudioManagement.Application.pdb
+/app/applet/StudioManagement.Application/obj/Release/net8.0/ref/StudioManagement.Application.dll

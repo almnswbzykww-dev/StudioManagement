@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "iPURO9vGbYjG7rrRKjap+H63J9mmPMKUYznf2zNiD1s1zSzLTPReL1xgpEQAi/JNp44AnycHfSno8kQGOjwF1A==",
+  "dgSpecHash": "/wCf6uXUhVo=",
   "success": true,
   "projectFilePath": "/app/applet/StudioManagement.Reports/StudioManagement.Reports.csproj",
   "expectedPackageFiles": [
@@ -84,7 +84,8 @@
     "/root/.nuget/packages/system.threading.timer/4.3.0/system.threading.timer.4.3.0.nupkg.sha512",
     "/root/.nuget/packages/system.xml.readerwriter/4.3.0/system.xml.readerwriter.4.3.0.nupkg.sha512",
     "/root/.nuget/packages/system.xml.xdocument/4.3.0/system.xml.xdocument.4.3.0.nupkg.sha512",
-    "/root/.nuget/packages/xlparser/1.5.2/xlparser.1.5.2.nupkg.sha512"
+    "/root/.nuget/packages/xlparser/1.5.2/xlparser.1.5.2.nupkg.sha512",
+    "/root/.nuget/packages/microsoft.windowsdesktop.app.ref/8.0.32/microsoft.windowsdesktop.app.ref.8.0.32.nupkg.sha512"
   ],
   "logs": []
 }

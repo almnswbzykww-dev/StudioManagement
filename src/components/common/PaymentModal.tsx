@@ -18,6 +18,7 @@ import {
   Phone,
   Image as ImageIcon
 } from 'lucide-react';
+import { WalletIcon, WalletSelector, WALLET_CONFIGS } from './WalletIcons';
 
 interface PaymentModalProps {
   order: Order;
@@ -34,7 +35,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [method, setMethod] = useState<PaymentMethod>('cash');
-  const [walletType, setWalletType] = useState<BankWalletType>('kuraimi');
+  const [walletType, setWalletType] = useState<BankWalletType | undefined>('kuraimi');
   
   // Form fields
   const [amount, setAmount] = useState<number | string>(order.remainingAmount || 0);
@@ -85,7 +86,8 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       return;
     }
 
-    const selectedWallet = wallets.find(w => w.type === walletType);
+    const selectedWalletConfig = walletType ? WALLET_CONFIGS[walletType] : null;
+    const walletLabel = selectedWalletConfig ? selectedWalletConfig.label : 'تحويل بنكي / محفظة عامة';
 
     try {
       storageService.addPayment({
@@ -93,7 +95,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
         amount: numericAmount,
         method,
         walletType: method === 'bank_wallet' ? walletType : undefined,
-        walletName: method === 'bank_wallet' ? selectedWallet?.label : undefined,
+        walletName: method === 'bank_wallet' ? walletLabel : undefined,
         transactionNumber: method === 'bank_wallet' ? transactionNumber : undefined,
         transferNumber: method === 'bank_wallet' ? transferNumber : undefined,
         senderName: method === 'bank_wallet' ? senderName : undefined,
@@ -264,24 +266,23 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   {method === 'bank_wallet' && (
                     <div className="p-4 bg-slate-900/80 rounded-xl border border-blue-500/30 space-y-4 animate-in fade-in duration-200">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-2">اختر المحفظة أو البنك المستلم</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {wallets.map(w => (
-                            <button
-                              key={w.type}
-                              type="button"
-                              onClick={() => setWalletType(w.type)}
-                              className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs font-medium transition-all text-right cursor-pointer ${
-                                walletType === w.type
-                                  ? `bg-blue-600/20 ${w.color} border-current ring-1 ring-blue-500`
-                                  : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-750'
-                              }`}
-                            >
-                              <span className="text-base">{w.icon}</span>
-                              <span className="truncate">{w.label}</span>
-                            </button>
-                          ))}
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-semibold text-slate-300">
+                            المحفظة المستلمة <span className="text-slate-400 font-normal text-[11px]">(اختياري - سطر واحد)</span>
+                          </label>
+                          {walletType && WALLET_CONFIGS[walletType] && (
+                            <span className="text-[11px] font-bold text-amber-400 font-sans">
+                              {WALLET_CONFIGS[walletType].label}
+                            </span>
+                          )}
                         </div>
+                        <WalletSelector
+                          selectedType={walletType}
+                          onSelect={setWalletType}
+                          allowClear={true}
+                          onClear={() => setWalletType(undefined)}
+                          compact={true}
+                        />
                       </div>
 
                       {/* Wallet Specific Fields */}
@@ -486,7 +487,14 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-slate-300">
-                          {p.walletName || '-'}
+                          {p.walletName ? (
+                            <div className="flex items-center gap-1.5">
+                              {p.walletType ? <WalletIcon type={p.walletType} size="sm" /> : null}
+                              <span className="truncate">{p.walletName}</span>
+                            </div>
+                          ) : (
+                            '-'
+                          )}
                         </td>
                         <td className="py-2.5 px-3 text-slate-300 font-mono">
                           {p.transactionNumber || '-'}

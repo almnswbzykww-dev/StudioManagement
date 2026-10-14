@@ -16,7 +16,12 @@ import {
   CheckCircle2,
   TrendingUp,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  DownloadCloud,
+  HardDrive,
+  Copy,
+  Check,
+  ExternalLink
 } from 'lucide-react';
 
 interface ReportsPageProps {
@@ -28,6 +33,20 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ onClose }) => {
   const [fromDate, setFromDate] = useState<string>('2026-09-01');
   const [toDate, setToDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const todayStr = new Date().toISOString().split('T')[0];
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleCopyLink = () => {
+    const fullUrl = window.location.origin + '/StudioManagement-Final.zip';
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(fullUrl).then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2500);
+      }).catch(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2500);
+      });
+    }
+  };
 
   const orders = storageService.getOrders();
   const customers = storageService.getCustomers();
@@ -49,7 +68,8 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ onClose }) => {
     { id: 'inventory', title: 'تقرير أرصدة المخزون والأصناف المنخفضة', icon: <Boxes className="w-4 h-4 text-orange-400" /> },
     { id: 'delayed', title: 'تقرير الطلبات المتأخرة عن موعد التسليم', icon: <Clock className="w-4 h-4 text-rose-400" /> },
     { id: 'wedding', title: 'تقرير لوحات العرسان والأعراس', icon: <FileText className="w-4 h-4 text-pink-400" /> },
-    { id: 'audit', title: 'تقرير سجل العمليات والأمان (Audit Log)', icon: <ShieldCheck className="w-4 h-4 text-yellow-400" /> }
+    { id: 'audit', title: 'تقرير سجل العمليات والأمان (Audit Log)', icon: <ShieldCheck className="w-4 h-4 text-yellow-400" /> },
+    { id: 'project_package', title: '📦 تحميل حزمة المشروع وسورس كود النظام كاملاً', icon: <DownloadCloud className="w-4 h-4 text-emerald-400" /> }
   ];
 
   const handlePrint = () => {
@@ -122,6 +142,82 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ onClose }) => {
     >
       <div className="space-y-6">
         
+        {/* Dedicated Working Project Download Card */}
+        <div className="bg-gradient-to-r from-blue-950/70 via-slate-900 to-indigo-950/70 border-2 border-blue-500/50 rounded-2xl p-5 shadow-xl print:hidden animate-in fade-in duration-200">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="space-y-1.5 max-w-2xl text-right">
+              <div className="flex items-center gap-2 text-white font-black text-base">
+                <span className="p-2 rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/40">
+                  <DownloadCloud className="w-5 h-5" />
+                </span>
+                <span>تحميل حزمة المشروع الكاملة المعتمدة (ZIP مباشر وفعال)</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold font-mono">
+                  100% OFFLINE READY
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                تحتوي الحزمة على سورس كود النظام الكامل، تطبيق سطح المكتب (WPF .NET)، تطبيق الويب، قاعدة البيانات المحلية المهيأة بدون نت، وكافة الأيقونات والتصاميم. الرابط مباشر ويعمل فوراً دون أي متطلبات أمان أو حماية.
+              </p>
+              <div className="flex items-center gap-4 text-[11px] text-slate-400 font-mono">
+                <span>📁 اسم الملف: StudioManagement-Final.zip</span>
+                <span>•</span>
+                <span>⚡ تشغيل مباشر ومستقل بدون نت</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+              {/* Button 1: Direct File Download */}
+              <a
+                href="/StudioManagement-Final.zip"
+                download="StudioManagement-Final.zip"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-lg shadow-emerald-600/30 transition-all cursor-pointer whitespace-nowrap"
+                title="تنزيل ملف ZIP مباشرة إلى جهازك"
+              >
+                <DownloadCloud className="w-4 h-4" />
+                <span>تحميل مباشر (ZIP)</span>
+              </a>
+
+              {/* Button 2: Direct Open in New Tab (Bypasses any iframe sandbox) */}
+              <a
+                href="/StudioManagement-Final.zip"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
+                title="فتح الرابط المباشر في تبويب جديد بدون قيود إطار"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>فتح وتبويب جديد</span>
+              </a>
+
+              {/* Button 3: Copy Direct Link to Clipboard */}
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap ${
+                  copiedLink
+                    ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-200'
+                }`}
+                title="نسخ الرابط المباشر للصقه في المتصفح أو برنامج التحميل"
+              >
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+                <span>{copiedLink ? 'تم نسخ الرابط!' : 'نسخ الرابط المباشر'}</span>
+              </button>
+
+              {/* Button 4: Alternate Mirror */}
+              <a
+                href="/StudioManagement-FullSolution-Fixed.zip"
+                download="StudioManagement-FullSolution-Fixed.zip"
+                className="flex-1 lg:flex-none flex items-center justify-center gap-1.5 px-3 py-2.5 bg-slate-900 hover:bg-slate-850 text-slate-400 hover:text-slate-200 border border-slate-800 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap"
+                title="رابط بديل إضافي"
+              >
+                <HardDrive className="w-3.5 h-3.5 text-slate-400" />
+                <span>سيرفر بديل</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Report Selector & Date Filter */}
         <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex flex-col lg:flex-row items-center justify-between gap-4 print:hidden">
           {/* Select Report Dropdown */}
@@ -348,6 +444,99 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ onClose }) => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* Report: Project Package & System Source Code */}
+          {selectedReport === 'project_package' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
+                  <div className="flex items-center gap-2 text-white font-bold text-sm">
+                    <span className="p-1.5 bg-blue-600/20 text-blue-400 rounded-lg">🖥️</span>
+                    <span>تطبيق WPF لسطح المكتب</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    مشروع .NET C# WPF كامل مع شاشات XAML، نظام المحاسبة، وتخصيص الطباعة وقاعدة البيانات.
+                  </p>
+                  <span className="inline-block px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[11px] font-mono font-bold">
+                    جاهز للتشغيل والترجمة
+                  </span>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
+                  <div className="flex items-center gap-2 text-white font-bold text-sm">
+                    <span className="p-1.5 bg-emerald-600/20 text-emerald-400 rounded-lg">🌐</span>
+                    <span>نظام الويب SPA المتكامل</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    واجهة React + TypeScript مع محرك كشوف الحسابات والمحافظ وإدارة الاستوديو بدون إنترنت.
+                  </p>
+                  <span className="inline-block px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[11px] font-mono font-bold">
+                    أوفلاين 100%
+                  </span>
+                </div>
+
+                <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-2">
+                  <div className="flex items-center gap-2 text-white font-bold text-sm">
+                    <span className="p-1.5 bg-amber-600/20 text-amber-400 rounded-lg">🗄️</span>
+                    <span>قاعدة البيانات والمزامنة</span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    قاعدة بيانات محلية متوافقة مع SQLite و SQL Server مع المزامنة التلقائية والنسخ الاحتياطي.
+                  </p>
+                  <span className="inline-block px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[11px] font-mono font-bold">
+                    بيانات محمية وثابتة
+                  </span>
+                </div>
+              </div>
+
+              {/* Direct Download Box in Report */}
+              <div className="p-6 bg-slate-950/90 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-right">
+                  <h4 className="text-sm font-bold text-white mb-1">
+                    رابط التحميل المباشر للحزمة: StudioManagement-Final.zip
+                  </h4>
+                  <p className="text-xs text-slate-400">
+                    حجم الملف المباشر يضم كامل السورس كود، مشاريع C#، وتطبيق الويب بدون أي متطلبات أمان أو قيود.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <a
+                    href="/StudioManagement-Final.zip"
+                    download="StudioManagement-Final.zip"
+                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black shadow-md transition cursor-pointer flex items-center gap-2 whitespace-nowrap"
+                    title="تحميل مباشر"
+                  >
+                    <DownloadCloud className="w-4 h-4" />
+                    <span>تحميل فوري الآن (ZIP)</span>
+                  </a>
+
+                  <a
+                    href="/StudioManagement-Final.zip"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                    title="فتح في تبويب مستقل"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>فتح بتبويب جديد</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                      copiedLink
+                        ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300'
+                        : 'bg-slate-800 hover:bg-slate-750 border-slate-700 text-slate-200'
+                    }`}
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+                    <span>{copiedLink ? 'تم النسخ!' : 'نسخ الرابط'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}

@@ -17,6 +17,7 @@ import {
   Hash,
   ChevronDown
 } from 'lucide-react';
+import { WalletSelector, WalletIcon, WALLET_CONFIGS } from '../common/WalletIcons';
 
 interface OrderEditorModalProps {
   order?: Order | null;
@@ -161,7 +162,7 @@ export const OrderEditorModal: React.FC<OrderEditorModalProps> = ({
     if (order?.paidAmount !== undefined && order.paidAmount > 0) return String(order.paidAmount);
     return ''; // Empty by default
   });
-  const [walletType, setWalletType] = useState<BankWalletType>('kuraimi');
+  const [walletType, setWalletType] = useState<BankWalletType | undefined>('kuraimi');
   const [referenceNumber, setReferenceNumber] = useState('');
   const [note, setNote] = useState(order?.notes || '');
   const [errorMsg, setErrorMsg] = useState('');
@@ -315,7 +316,7 @@ export const OrderEditorModal: React.FC<OrderEditorModalProps> = ({
         amount: finalPaid,
         method: paymentMethod,
         walletType: paymentMethod === 'bank_wallet' ? walletType : undefined,
-        walletName: paymentMethod === 'bank_wallet' ? walletType : undefined,
+        walletName: paymentMethod === 'bank_wallet' ? (walletType && WALLET_CONFIGS[walletType] ? WALLET_CONFIGS[walletType].label : 'تحويل بنكي / محفظة') : undefined,
         transactionNumber: referenceNumber.trim(),
         date: bookingDate,
         time: bookingTime,
@@ -842,32 +843,37 @@ export const OrderEditorModal: React.FC<OrderEditorModalProps> = ({
 
             {/* Extra Bank / Electronic Fields */}
             {paymentMethod === 'bank_wallet' && (
-              <div className="pt-3 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
+              <div className="pt-3 border-t border-slate-800 space-y-4 animate-in fade-in duration-200">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">المحفظة / الحساب البنكي *</label>
-                  <select
-                    value={walletType}
-                    onChange={e => setWalletType(e.target.value as BankWalletType)}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-amber-400 cursor-pointer font-bold"
-                  >
-                    <option value="kuraimi">الكريمي / إم فلوس (Kuraimi)</option>
-                    <option value="jeeb">محفظة جيب (Jeeb)</option>
-                    <option value="jawwali">محفظة جوالي (Jawwali)</option>
-                    <option value="one_cash">ون كاش (One Cash)</option>
-                    <option value="floosak">محفظة فلوسك (Floosak)</option>
-                    <option value="qutaibi">بنك القطيبي الإسلامي</option>
-                    <option value="bank_transfer">حساب بنكي / تحويل إلكتروني</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-300">
+                      المحفظة المستلمة <span className="text-slate-400 font-normal text-[11px]">(اختياري - سطر واحد)</span>
+                    </label>
+                    {walletType && WALLET_CONFIGS[walletType] && (
+                      <span className="text-xs font-bold text-amber-400">
+                        {WALLET_CONFIGS[walletType].label}
+                      </span>
+                    )}
+                  </div>
+                  <WalletSelector
+                    selectedType={walletType}
+                    onSelect={setWalletType}
+                    allowClear={true}
+                    onClear={() => setWalletType(undefined)}
+                    compact={true}
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">رقم المرجع / الإشعار *</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                    رقم المرجع / رقم العملية في المحفظة *
+                  </label>
                   <input
                     type="text"
                     required
                     value={referenceNumber}
                     onChange={e => setReferenceNumber(toEnglishDigits(e.target.value))}
-                    placeholder="أدخل رقم الحوالة أو الإشعار البنكي"
+                    placeholder="مثال: رقم العملية أو إشعار التحويل 8899120"
                     dir="ltr"
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono font-bold tracking-wider text-right"
                   />

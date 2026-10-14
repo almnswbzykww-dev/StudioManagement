@@ -91,7 +91,10 @@ public record CreateSalaryAdvanceDto(int EmployeeId, decimal Amount, DateTime Ad
 public record EmployeeDebtDto(int Id, string DebtNumber, int EmployeeId, string EmployeeName, decimal Amount, DateTime Date, string Reason, bool IsSettled, decimal SettledAmount, string? Notes, string RecordedByName);
 public record CreateEmployeeDebtDto(int EmployeeId, decimal Amount, DateTime Date, string Reason, string? Notes);
 public record EmployeePaymentDto(int Id, string PaymentNumber, int EmployeeId, string EmployeeName, decimal Amount, DateTime Date, PaymentMethod Method, WalletType? WalletType, string Description, int? RelatedDebtId, string? Notes, string RecordedByName);
-public record CreateEmployeePaymentDto(int EmployeeId, decimal Amount, DateTime Date, PaymentMethod Method, WalletType? WalletType, string Description, int? RelatedDebtId, string? Notes);
+public record CreateEmployeePaymentDto(int EmployeeId, decimal Amount, DateTime Date, PaymentMethod Method, WalletType? WalletType, string Description, int? RelatedDebtId, string? Notes)
+{
+    public PaymentMethod PaymentMethod => Method;
+}
 public record SalaryDto(int Id, string PaymentNumber, int EmployeeId, string EmployeeName, string MonthYear, decimal BaseSalary, decimal Allowances, decimal Deductions, decimal AdvancesDeducted, decimal NetSalary, DateTime PaymentDate, string PaidByName);
 public record ProcessSalaryDto(int EmployeeId, string MonthYear, decimal Allowances, decimal Deductions, DateTime PaymentDate, PaymentMethod Method, string? Notes);
 
@@ -149,7 +152,10 @@ public record CashierIncomeReportDto(
     decimal TotalRemaining,
     decimal NetIncome,
     List<CashierOrderRowDto> Orders
-);
+)
+{
+    public int TotalOrdersCount => OrdersCount;
+};
 
 public record TodayIncomeSummaryDto(
     int TotalOrdersCount,

@@ -53,40 +53,43 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
 
-  // Real-Time Live Clock & Date matching image format: 📅 2025-06-17 | ⏰ 10:24 م / 2025
-  const [dateTimeInfo, setDateTimeInfo] = useState({
-    dateStr: '',
-    timeStr: '',
-    yearStr: ''
-  });
+  // Helper to format real-time live clock with English numerals and Arabic day (100% steady)
+  const getLiveDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateFormatted = `${year}-${month}-${day}`;
 
+    const arabicDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const dayName = arabicDays[now.getDay()];
 
+    const rawHours = now.getHours();
+    const ampm = rawHours >= 12 ? 'م' : 'ص';
+    const hours12 = rawHours % 12 || 12;
+    const hoursPadded = String(hours12).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const digitalClock = `${hoursPadded}:${minutes}:${seconds}`;
+
+    return {
+      dateStr: dateFormatted,
+      digitalClock,
+      ampm,
+      timeStr: `${digitalClock} ${ampm}`,
+      yearStr: String(year),
+      dayName
+    };
+  };
+
+  // Real-Time Live Clock & Date initialized synchronously
+  const [dateTimeInfo, setDateTimeInfo] = useState(getLiveDateTime);
 
   // Update clock every second
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const dateFormatted = `${year}-${month}-${day}`;
-
-      let hours = now.getHours();
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'م' : 'ص';
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      const timeFormatted = `${hours}:${minutes} ${ampm}`;
-
-      setDateTimeInfo({
-        dateStr: dateFormatted,
-        timeStr: timeFormatted,
-        yearStr: String(year)
-      });
-    };
-
-    updateTime();
-    const timer = setInterval(updateTime, 1000);
+    const timer = setInterval(() => {
+      setDateTimeInfo(getLiveDateTime());
+    }, 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -109,10 +112,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   // Find user by either userNumber, username, id, or phone (flexible for text or numbers)
   const findMatchedUser = (val: string) => {
-    const trimmed = val.trim().toLowerCase();
+    const normalized = storageService.constructor['normalizeDigits' as keyof typeof storageService.constructor]
+      ? (storageService.constructor as any).normalizeDigits(val)
+      : val;
+    const trimmed = normalized.trim().toLowerCase();
     if (!trimmed) return null;
     return systemUsers.find(
       u => String(u.userNumber) === trimmed || 
+           (u.userNumber === 1 && (trimmed === '1001' || trimmed === '1')) ||
+           (u.userNumber === 2 && (trimmed === '1002' || trimmed === '2')) ||
            String(u.userNumber).padStart(2, '0') === trimmed ||
            u.id.toLowerCase() === trimmed ||
            u.id.replace('u-', '') === trimmed ||
@@ -124,16 +132,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   // Currently detected matched user object (for live visual feedback)
   const currentMatchedUser = findMatchedUser(userNumber) || findMatchedUser(username);
 
-  // When User Number changes: automatically find and update the Username!
+  // When User Number changes: automatically convert Arabic numbers to English digits and update the Username!
   const handleUserNumberChange = (val: string) => {
-    setUserNumber(val);
-    const trimmed = val.trim();
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    let cleanVal = val;
+    arabicDigits.forEach((d, idx) => {
+      cleanVal = cleanVal.replaceAll(d, String(idx));
+    });
+
+    setUserNumber(cleanVal);
+    const trimmed = cleanVal.trim();
     if (!trimmed) {
       setUsername('');
       return;
     }
     const matched = systemUsers.find(
-      u => String(u.userNumber) === trimmed || String(u.userNumber).padStart(2, '0') === trimmed
+      u => String(u.userNumber) === trimmed || 
+           (u.userNumber === 1 && (trimmed === '1001' || trimmed === '1')) ||
+           (u.userNumber === 2 && (trimmed === '1002' || trimmed === '2')) ||
+           String(u.userNumber).padStart(2, '0') === trimmed
     );
     if (matched) {
       setUsername(matched.username);
@@ -421,22 +438,29 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               لتصوير والفيديو والإعلانات
             </p>
 
-            {/* 4. Live Date + Time + Year Row */}
-            <div className="flex items-center justify-center gap-3 text-xs sm:text-sm text-slate-300 font-medium mb-1">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4 text-slate-400" />
-                <span className="font-mono text-slate-200">{dateTimeInfo.dateStr || '2025-06-17'}</span>
+            {/* 4. Live Date + Time + Year Row - 100% Solid & Jitter-Free */}
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 text-xs text-slate-300 font-medium mb-4 select-none">
+              {/* Day Badge */}
+              <span className="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-400 font-bold shrink-0">
+                {dateTimeInfo.dayName}
               </span>
-              <span className="text-slate-600">|</span>
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-400" />
-                <span className="font-mono text-amber-300 font-bold">{dateTimeInfo.timeStr || '10:24 م'}</span>
-              </span>
-            </div>
 
-            {/* Sub-text Year */}
-            <div className="text-xs text-slate-500 font-mono mb-4">
-              {dateTimeInfo.yearStr || '2025'}
+              {/* Date Badge */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-200 shrink-0" dir="ltr">
+                <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                <span className="font-mono font-bold tracking-wide tabular-nums">{dateTimeInfo.dateStr}</span>
+              </div>
+
+              {/* Live Digital Clock Badge - Fixed width, no jitter */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900/90 border border-amber-500/35 text-amber-300 shadow-inner shrink-0" dir="ltr">
+                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <span className="font-mono font-black tracking-widest tabular-nums text-xs sm:text-sm w-[72px] text-center inline-block">
+                  {dateTimeInfo.digitalClock}
+                </span>
+                <span className="text-[10px] font-bold text-amber-400 px-1 py-0.5 rounded bg-amber-500/20">
+                  {dateTimeInfo.ampm}
+                </span>
+              </div>
             </div>
 
             {/* 5. The 3 Login Input Fields (Accept Text & Numbers Naturally without Glitches) */}

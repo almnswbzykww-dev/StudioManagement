@@ -61,11 +61,18 @@ export interface Customer {
 export type PaymentMethod = 'cash' | 'bank_wallet';
 
 export type BankWalletType = 
-  | 'jeeb'      // جيب
-  | 'jawwali'   // جوالي
-  | 'one_cash'  // ون كاش
-  | 'floosak'   // فلوسك
-  | 'kuraimi';  // كريمي / إم فلوس
+  | 'kuraimi'       // كريمي / إم فلوس / كريمي جوال
+  | 'jeeb'          // محفظة جيب
+  | 'jawwali'       // محفظة جوالي
+  | 'one_cash'      // محفظة ون كاش
+  | 'floosak'       // محفظة فلوسك
+  | 'cash_wallet'   // محفظة كاش
+  | 'pyes'          // محفظة بيس (بنك الأمل)
+  | 'mobile_money'  // محفظة موبايل موني
+  | 'tadhamon_pay'  // تضامن باي (بنك التضامن)
+  | 'qutaibi_banki' // بنك القطيبي / بنكي
+  | 'shamel_money'  // محفظة شامل موني
+  | 'remittance';   // شبكات الحوالات (النجم، الامتياز، يمن إكسبرس)
 
 export interface PaymentRecord {
   id: string;

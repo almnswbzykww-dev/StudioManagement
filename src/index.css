@@ -40,7 +40,7 @@
   background: #475569;
 }
 
-/* Print Rules for Perfect Invoices and Reports */
+/* Print Rules for Perfect Invoices, Statements and Reports */
 @media print {
   body {
     background: #ffffff !important;
@@ -51,7 +51,7 @@
     display: none !important;
   }
 
-  #printable-invoice, #printable-report, #printable-voucher {
+  #printable-invoice, #printable-report, #printable-voucher, #printable-customer-statement, #printable-employee-statement {
     display: block !important;
     position: absolute !important;
     top: 0 !important;
@@ -59,10 +59,33 @@
     left: 0 !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 20px !important;
     border: none !important;
     box-shadow: none !important;
     background: #ffffff !important;
     color: #000000 !important;
+  }
+
+  #printable-customer-statement *, #printable-employee-statement * {
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    background-color: transparent !important;
+  }
+
+  #printable-customer-statement table, #printable-employee-statement table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  #printable-customer-statement th, #printable-employee-statement th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    font-weight: bold !important;
+  }
+
+  #printable-customer-statement td, #printable-employee-statement td {
+    border: 1px solid #e2e8f0 !important;
+    padding: 6px 8px !important;
   }
 }

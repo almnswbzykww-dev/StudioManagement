@@ -292,7 +292,7 @@
                                         </StackPanel>
 
                                         <!-- Document Meta Badge -->
-                                        <Border Grid.Column="1" Background="#FFF5F7" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Padding="16,8" TextAlignment="Left">
+                                        <Border Grid.Column="1" Background="#FFF5F7" BorderBrush="#FBCFE8" BorderThickness="1.5" CornerRadius="8" Padding="16,8">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding DocumentData.DocumentTypeTitle}" FontSize="14" FontWeight="Bold" Foreground="#6B0B2E" HorizontalAlignment="Right" />
                                                 <TextBlock Text="{Binding DocumentData.DocumentNumber, StringFormat='الرقم: {0}'}" FontSize="12" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Right" Margin="0,4,0,0" />

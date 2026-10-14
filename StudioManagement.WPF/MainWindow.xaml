@@ -6,6 +6,7 @@
         Height="780" Width="1240"
         MinWidth="1000" MinHeight="600"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         FlowDirection="RightToLeft"
         Background="{StaticResource SurfaceBrush}">
     <Grid>
@@ -124,8 +125,10 @@
                 </ScrollViewer>
             </Border>
 
-            <!-- Dynamic Viewport -->
-            <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" Margin="16" />
+            <!-- Dynamic Viewport with responsive scrolling support -->
+            <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ContentControl Content="{Binding CurrentViewModel}" Margin="16" />
+            </ScrollViewer>
 
             <!-- Notifications Flyout Overlay Panel -->
             <Border Grid.ColumnSpan="2" Visibility="{Binding IsNotificationsOpen, Converter={StaticResource BooleanToVisibilityConverter}}"

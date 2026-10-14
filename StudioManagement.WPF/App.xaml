@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:StudioManagement.WPF"
              xmlns:vm="clr-namespace:StudioManagement.WPF.ViewModels"
-             xmlns:views="clr-namespace:StudioManagement.WPF.Views">
+             xmlns:views="clr-namespace:StudioManagement.WPF.Views"
+             xmlns:conv="clr-namespace:StudioManagement.WPF.Converters">
     <Application.Resources>
         <!-- Brand Theme Colors -->
         <SolidColorBrush x:Key="BrandPrimaryBrush" Color="#0B132B" />
@@ -20,6 +21,7 @@
 
         <!-- Converters -->
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <conv:EqualityConverter x:Key="EqualityConverter" />
 
         <!-- DataTemplates for Page Navigation -->
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
